@@ -63,7 +63,7 @@ jobs:
 
         echo "Fetching Managed Identity for Service Principal"
         SP_ID=$(az ad sp show \
-          --id "${{env.AZURE_CLIENT_ID}}" \
+          --id $(az account show --query user.name -o tsv) \
           --query "id" -o tsv)
 
         if [[ -z "$SP_ID" ]]; then
