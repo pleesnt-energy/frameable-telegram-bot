@@ -1,7 +1,7 @@
 name: Deploy Azure Bot
 
 env:
-  RESOURCE_GROUP: frameabletelegrambot-rg 
+  RESOURCE_GROUP: frameable 
   FUNCTION_APP_NAME: frameabletelegrambot # Your bot
   FUNCTION_APP_LOCATION: newzealandnorth
   APP_INSIGHTS_LOCATION: australiasoutheast
@@ -32,6 +32,9 @@ jobs:
     # Step 3: Deploy Stage 1 (Initialize Resources).
     - name: Deploy Stage 1 (Foundational Components)
       run: |
+        echo "Deploying Stage 1: Create Resource Group "
+        az group create --name "${{env.RESOURCE_GROUP}}" --location ${{env.FUNCTION_APP_LOCATION}}
+
         echo "Deploying Stage 1: Function App and Key Vault initialization..."
         az deployment group create \
           --resource-group "${{env.RESOURCE_GROUP}}" \
