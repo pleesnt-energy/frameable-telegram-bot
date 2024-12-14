@@ -5,6 +5,7 @@ env:
   FUNCTION_APP_NAME: frameabletelegrambot # Your bot
   FUNCTION_APP_LOCATION: newzealandnorth
   APP_INSIGHTS_LOCATION: australiasoutheast
+  SCOREBOARD_DATABASE_ID: <your-notion-db-id> # Must be existing
   # secrets.BOT_TOKEN
   # secrets.AZURE_CREDENTIALS 
   # secrets.AZURE_CLIENT_ID 
@@ -29,6 +30,26 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Deploy Preamble (Check Variables)
+      run: |
+        echo "Frameable bootstrap"
+        NOTION_API_KEY=${{secrets.NOTION_API_KEY}}
+
+        if [[ -z "$NOTION_API_KEY" ]]; then
+          echo "ERROR: NOTION_API_KEY missing" >&2
+          exit 1
+        fi
+
+        SCOREBOARD_DATABASE_ID=${{env.SCOREBOARD_DATABASE_ID}}
+
+        if [[ -z "$SCOREBOARD_DATABASE_ID" || "$SCOREBOARD_DATABASE_ID" == "<your-notion-db-id>" ]]; then
+            echo "ERROR: SCOREBOARD_DATABASE_ID is either missing or equals '<your-notion-db-id>'" >&2
+            exit 1
+        fi
+
+        echo "[ok] Notion Settings Valid"
+
 
     # Step 3: Deploy Stage 1 (Initialize Resources).
     - name: Deploy Stage 1 (Foundational Components)
