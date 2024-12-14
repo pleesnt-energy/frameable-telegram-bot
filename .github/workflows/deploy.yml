@@ -1,14 +1,13 @@
 name: Deploy Azure Bot
-description: This workflow incrementally provisions azure cloud infrastructure then builds the azure function app for deployment
 
 env:
-  RESOURCE_GROUP: nd7telegrambotstarter 
-  FUNCTION_APP_NAME: nd7telegrambotstarter # Your bot
+  RESOURCE_GROUP: frameabletelegrambot-rg 
+  FUNCTION_APP_NAME: frameabletelegrambot # Your bot
   FUNCTION_APP_LOCATION: newzealandnorth
   APP_INSIGHTS_LOCATION: australiasoutheast
   # secrets.BOT_TOKEN
   # secrets.AZURE_CREDENTIALS 
-  # secrets.CLIENT_ID
+  # secrets.AZURE_CLIENT_ID 
 
 on:
   push:
@@ -61,7 +60,7 @@ jobs:
 
         echo "Fetching Managed Identity for Service Principal"
         SP_ID=$(az ad sp show \
-          --id "${{env.CLIENT_ID}}" \
+          --id "${{env.AZURE_CLIENT_ID}}" \
           --query "id" -o tsv)
 
         if [[ -z "$SP_ID" ]]; then
