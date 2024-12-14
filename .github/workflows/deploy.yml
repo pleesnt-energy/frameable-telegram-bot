@@ -1,0 +1,166 @@
+name: Deploy Azure Bot
+description: This workflow incrementally provisions azure cloud infrastructure then builds the azure function app for deployment
+
+env:
+  RESOURCE_GROUP: nd7telegrambotstarter 
+  FUNCTION_APP_NAME: nd7telegrambotstarter # Your bot
+  FUNCTION_APP_LOCATION: newzealandnorth
+  APP_INSIGHTS_LOCATION: australiasoutheast
+  # secrets.BOT_TOKEN
+  # secrets.AZURE_CREDENTIALS 
+  # secrets.CLIENT_ID
+
+on:
+  push:
+    branches:
+      - main # Deploy on push to "main" branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Check out the repository.
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Log in to Azure.
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # Step 3: Deploy Stage 1 (Initialize Resources).
+    - name: Deploy Stage 1 (Foundational Components)
+      run: |
+        echo "Deploying Stage 1: Function App and Key Vault initialization..."
+        az deployment group create \
+          --resource-group "${{env.RESOURCE_GROUP}}" \
+          --template-file ./deployment/bicep/deploy_foundational.bicep \
+          --parameters \
+            functionAppName="${{env.FUNCTION_APP_NAME}}" \
+            location="${{env.FUNCTION_APP_LOCATION}}" \
+            appInsightsLocation="${{env.APP_INSIGHTS_LOCATION}}"
+
+    # Step 4: Fetch system identity and set BOT_TOKEN from GitHub Secrets.
+    - name: Fetch Azure Managed Identity
+      run: |
+        echo "Fetching Managed Identity for Function App..."
+        APP_ID=$(az functionapp identity show \
+          --name "${{env.FUNCTION_APP_NAME}}" \
+          --resource-group "${{env.RESOURCE_GROUP}}" \
+          --query "principalId" -o tsv)
+
+        if [[ -z "$APP_ID" ]]; then
+          echo "ERROR: Failed to fetch Function App's Managed Identity Principal ID!" >&2
+          exit 1
+        fi
+        
+        echo "APP_ID=${APP_ID}" >> $GITHUB_ENV
+        echo "${{env.APP_ID}}"
+
+        echo "Fetching Managed Identity for Service Principal"
+        SP_ID=$(az ad sp show \
+          --id "${{env.CLIENT_ID}}" \
+          --query "id" -o tsv)
+
+        if [[ -z "$SP_ID" ]]; then
+          echo "ERROR: Failed to fetch Service Principal ID!" >&2
+          exit 1
+        fi
+
+        echo "SP_ID=${SP_ID}" >> $GITHUB_ENV
+        echo "${{env.SP_ID}}"
+
+        echo "Setting BOT_TOKEN from GitHub Secrets..."
+        echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> $GITHUB_ENV
+
+    # Step 5.1: Update Access Policies (Stage 2 Policies).
+    - name: Deploy Stage 2 Policies
+      run: |
+        echo "Deploying Stage 2: Assigning Key Vault access policy..."
+        az deployment group create \
+          --resource-group "${{env.RESOURCE_GROUP}}" \
+          --template-file ./deployment/bicep/deploy_policies.bicep \
+          --parameters \
+            functionAppName="${{env.FUNCTION_APP_NAME}}" \
+            appId="${{env.APP_ID}}" \
+            principalId="${{env.SP_ID}}"
+
+    # Step 5.2: Create BOT-TOKEN in Key Vault (Stage 2 Secrets).
+    - name: Deploy Stage 2 Secrets
+      run: |
+        echo "Deploying Stage 2: Adding BOT-TOKEN to Key Vault..."
+        az deployment group create \
+          --resource-group "${{env.RESOURCE_GROUP}}" \
+          --template-file ./deployment/bicep/deploy_secrets.bicep \
+          --parameters \
+            functionAppName="${{env.FUNCTION_APP_NAME}}" \
+            location="${{env.FUNCTION_APP_LOCATION}}" \
+            botToken="${{ secrets.BOT_TOKEN }}"
+
+    # Step 5.3: Finalize Function App Configuration.
+    - name: Finalize Function App Key Vault Integration
+      run: |
+        echo "Deploying Stage 2: Finalizing Key Vault and Function App integration..."
+        az deployment group create \
+          --resource-group "${{env.RESOURCE_GROUP}}" \
+          --template-file ./deployment/bicep/deploy_settings.bicep \
+          --parameters \
+            functionAppName="${{env.FUNCTION_APP_NAME}}" \
+            location="${{env.FUNCTION_APP_LOCATION}}"
+
+    # Step 6: Build TypeScript Code and Prepare Deployment.
+    # Step 6.1: Install and Build TypeScript Code
+    - name: Build TypeScript Code
+      run: |
+        echo "Installing dependencies..."
+        cd src/nd7-telegram-bot
+        npm install  # Install dependencies
+        echo "Compiling TypeScript code..."
+        npm run build             # Compile TypeScript to the "dist" folder
+
+    # Step 6.2: Remove all devDependencies
+    - name: Prune Dev Dependencies
+      run: |
+        echo "Removing devDependencies for deployment..."
+        npm prune --production
+
+    # Step 7: Package and Deploy the Azure Function App.
+    - name: Package and deploy the Azure Function App
+      run: |
+        cd src/nd7-telegram-bot
+
+        # Package only necessary files for deployment (including dist)
+        zip -r ../../nd7telegrambotstarter.zip * .[^.]* -x "*.spec.ts" "*.test.ts" "*.log" "temp/*" "*.git*" "*.vscode*"
+
+        # .zip should be significantly smaller than 500 MB
+        ls -lh ../../nd7telegrambotstarter.zip
+
+        # Deploy the ZIP file to Azure Function App
+        az functionapp deployment source config-zip \
+          --name "${{env.FUNCTION_APP_NAME}}" \
+          --resource-group "${{env.RESOURCE_GROUP}}" \
+          --src "../../nd7telegrambotstarter.zip"
+
+    # Step 8: Finalize Webhook URL and Update Telegram Webhook API.
+    - name: Finalize Webhook URL
+      run: |
+        echo "Fetching the finalized hostname for the Function App..."
+        webhook_url=$(az functionapp show \
+          --name "${{env.FUNCTION_APP_NAME}}" \
+          --resource-group "${{env.RESOURCE_GROUP}}" \
+          --query "defaultHostName" -o tsv)
+
+        if [[ -z "$webhook_url" ]]; then
+          echo "ERROR: Hostname retrieval failed!" >&2
+          exit 1
+        fi
+
+        webhook_url="https://${webhook_url}/api/bot"
+        echo "Resolved Webhook URL: ${webhook_url}"
+
+        echo "Registering with Telegram API..."
+        curl -X POST "https://api.telegram.org/bot${{ env.BOT_TOKEN }}/setWebhook" \
+          -H "Content-Type: application/json" \
+          -d "{\"url\": \"${webhook_url}\"}"

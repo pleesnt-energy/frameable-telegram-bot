@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "commonjs",
+        "lib": ["es6", "dom"],
+        "strict": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "./dist", // Ensure compiled files go to the dist folder
+        "rootDir": "./src", // Your source files live in src,
+        "types": ["node", "jest"] // Add Jest types here
+    },
+    "include": ["src/**/*","src/**/*.spec.ts"],
+    "exclude": ["node_modules", "dist"]
+}

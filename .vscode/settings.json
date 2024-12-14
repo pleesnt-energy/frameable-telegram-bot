@@ -1,0 +1,10 @@
+{
+    "azureFunctions.deploySubpath": "src/nd7-telegram-bot",
+    "azureFunctions.postDeployTask": "npm install (functions)",
+    "azureFunctions.projectLanguage": "TypeScript",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.projectLanguageModel": 4,
+    "azureFunctions.projectSubpath": "src/nd7-telegram-bot",
+    "azureFunctions.preDeployTask": "npm prune (functions)"
+}
