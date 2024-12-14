@@ -10,16 +10,28 @@ param functionAppName string
 @secure()
 param botToken string
 
+@description('Notion api token value')
+@secure()
+param notionApiToken string
+
 // Reference the existing Key Vault deployed in Stage 1
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: '${functionAppName}-kv'
 }
 
 // Add the BOT-TOKEN to the Key Vault as a new secret
-resource keyVaultSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+resource keyVaultSecret1 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: keyVault
   name: 'BOT-TOKEN'
   properties: {
     value: botToken
+  }
+}
+
+resource keyVaultSecret2 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'NOTION-API-TOKEN'
+  properties: {
+    value: notionApiToken
   }
 }

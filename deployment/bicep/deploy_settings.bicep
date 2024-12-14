@@ -54,6 +54,14 @@ resource functionAppUpdate 'Microsoft.Web/sites@2022-09-01' = {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY	'
           value: appInsights.properties.InstrumentationKey
         }
+        {
+          name: 'SCOREBOARD_DATABASE_ID'
+          value: ''
+        }
+        {
+          name: 'NOTION_API_KEY'
+          value: '@Microsoft.KeyVault(SecretUri=https://${keyVault.name}${environment().suffixes.keyvaultDns}/secrets/NOTION-API-KEY)'
+        }
       ]
     }
   }

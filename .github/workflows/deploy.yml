@@ -8,6 +8,7 @@ env:
   # secrets.BOT_TOKEN
   # secrets.AZURE_CREDENTIALS 
   # secrets.AZURE_CLIENT_ID 
+  # secrets.NOTION_API_TOKEN
 
 on:
   push:
@@ -99,7 +100,8 @@ jobs:
           --parameters \
             functionAppName="${{env.FUNCTION_APP_NAME}}" \
             location="${{env.FUNCTION_APP_LOCATION}}" \
-            botToken="${{ secrets.BOT_TOKEN }}"
+            botToken="${{ secrets.BOT_TOKEN }}" \
+            notionApiToken="${{ secrets.NOTION_API_TOKEN }}"
 
     # Step 5.3: Finalize Function App Configuration.
     - name: Finalize Function App Key Vault Integration
