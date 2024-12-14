@@ -6,6 +6,9 @@ param location string = 'newzealandnorth'
 @maxLength(24)
 param functionAppName string
 
+@description('Notion database id for scoreboard')
+param notionDatabaseId string
+
 // Reference existing Key Vault (already configured)
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: '${functionAppName}-kv'
@@ -56,7 +59,7 @@ resource functionAppUpdate 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'SCOREBOARD_DATABASE_ID'
-          value: ''
+          value: notionDatabaseId
         }
         {
           name: 'NOTION_API_KEY'

@@ -133,7 +133,8 @@ jobs:
           --template-file ./deployment/bicep/deploy_settings.bicep \
           --parameters \
             functionAppName="${{env.FUNCTION_APP_NAME}}" \
-            location="${{env.FUNCTION_APP_LOCATION}}"
+            location="${{env.FUNCTION_APP_LOCATION}}" \
+            notionDatabaseId="${{env.SCOREBOARD_DATABASE_ID}}"
 
     # Step 6: Build TypeScript Code and Prepare Deployment.
     # Step 6.1: Install and Build TypeScript Code
