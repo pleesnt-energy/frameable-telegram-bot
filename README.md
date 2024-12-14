@@ -32,7 +32,7 @@ src/
 │   │   ├── sampleCommand.ts    # Ur next command?
 │   └── index.ts                # Entry point for the bot
 ├── utils/
-│   ├── imagemagick.ts          # Shared ImageMagick utilities
+│   ├── utils.ts          # Shared utilities
 ├── LEARNINGS.md                # Development insights and notes
 ```
 
@@ -52,7 +52,7 @@ npm run build
 #### 3. Start Azure Functions
 ```bash
 npm start
-# Runs the bot locally
+# Runs the bot locally ( sort of )
 ```
 
 #### 4. Testing Telegram Commands
@@ -82,9 +82,7 @@ func azure functionapp publish <YOUR-FUNCTION-APP-NAME>
 ---
 
 ### 📘 Documentation
-- **Text Wrapping**: Future-proofed multi-line text rendering.
-- **Text Coloring**: Keyword highlighting for specific terms (rich annotation support).
-- **ImageMagick Commands**: Handles complex tasks via `imagemagick.ts` utilities.
+- **Testing**: Using Jest.
 
 ---
 
