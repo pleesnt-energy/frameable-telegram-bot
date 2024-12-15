@@ -75,6 +75,9 @@ confirmationStepHandler.action("CONFIRM_AWARD", async (ctx) => {
     await ctx.reply(`❌ Failed to award goal: ${errorMessage}`);
   } finally {
     ctx.answerCbQuery(); // Acknowledge inline button press
+    ctx.editMessageReplyMarkup({
+      inline_keyboard:[]
+    })
     return ctx.scene.leave();
   }
 });
