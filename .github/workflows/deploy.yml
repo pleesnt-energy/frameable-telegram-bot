@@ -17,9 +17,11 @@ on:
       - main # Deploy on push to "main" branch
 
 jobs:
+  
   deploy:
     runs-on: ubuntu-latest
-
+    env: 
+      NOTION_API_KEY: "${{secrets.NOTION_API_KEY}}"
     steps:
     # Step 1: Check out the repository.
     - name: Checkout code
@@ -31,25 +33,22 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Deploy Preamble (Check Variables)
+    # Check Notion Settings
+    - if: ${{ env.NOTION_API_KEY != '' }}
       run: |
-        echo "Frameable bootstrap"
-        NOTION_API_KEY=${{secrets.NOTION_API_KEY}}
+          SCOREBOARD_DATABASE_ID=${{env.SCOREBOARD_DATABASE_ID}}
 
-        if [[ -z "$NOTION_API_KEY" ]]; then
-          echo "ERROR: NOTION_API_KEY missing" >&2
-          exit 1
-        fi
+          if [[ -z "$SCOREBOARD_DATABASE_ID" || "$SCOREBOARD_DATABASE_ID" == "<your-notion-db-id>" ]]; then
+              echo "ERROR: SCOREBOARD_DATABASE_ID is either missing or equals '<your-notion-db-id>'" >&2
+              exit 1
+          fi
 
-        SCOREBOARD_DATABASE_ID=${{env.SCOREBOARD_DATABASE_ID}}
+          echo "Notion Settings Check [OK]"
 
-        if [[ -z "$SCOREBOARD_DATABASE_ID" || "$SCOREBOARD_DATABASE_ID" == "<your-notion-db-id>" ]]; then
-            echo "ERROR: SCOREBOARD_DATABASE_ID is either missing or equals '<your-notion-db-id>'" >&2
-            exit 1
-        fi
-
-        echo "[ok] Notion Settings Valid"
-
+    - if: ${{ env.super_secret == '' }}
+      run: |
+        echo "ERROR: NOTION_API_KEY missing" >&2
+        exit 1
 
     # Step 3: Deploy Stage 1 (Initialize Resources).
     - name: Deploy Stage 1 (Foundational Components)
