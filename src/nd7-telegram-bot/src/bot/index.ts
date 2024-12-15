@@ -20,6 +20,11 @@ function readHeader(request: HttpRequest, key: string): string {
 let bot: Telegraf = null as unknown as Telegraf;
 if (!bot) {
     bot = new Telegraf(process.env.BOT_TOKEN);
+
+    
+    bot.launch({
+        allowedUpdates: ['message', 'callback_query', 'message_reaction'],
+    });
     
     // Prevent webhook setup during tests
     if (process.env.NODE_ENV !== 'test') {
