@@ -18,7 +18,7 @@ export function exampleReply(input: string = "", userId: string = ""): string {
     return fallbackPhrases[Math.floor(Math.random() * fallbackPhrases.length)];
 }
 
-export const setBotCommands = (bot: Telegraf<Context<Update>>) => {
+export const setBotCommands = <T extends Context>(bot: Telegraf<T>) => {
     
     bot.command("score", async (ctx) => {
         try {

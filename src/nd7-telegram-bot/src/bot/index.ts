@@ -1,9 +1,11 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
-import { Telegraf } from 'telegraf';
+import { Scenes, session, Telegraf } from 'telegraf';
 import { Update } from 'telegraf/typings/core/types/typegram';
 import dotenv from 'dotenv';
 import { setBotCommands } from './commands/botCommands';
 import { addSampleCommand } from './commands/sampleCommand';
+
+import awardWizard, { MyWizardContext } from "./commands/scenes/awardWizard";
 
 // Load environment variables
 dotenv.config();
@@ -17,9 +19,9 @@ function readHeader(request: HttpRequest, key: string): string {
     return Object.fromEntries(request.headers.entries())[key];
 }
 
-let bot: Telegraf = null as unknown as Telegraf;
+let bot: Telegraf<MyWizardContext> = null as unknown as Telegraf<MyWizardContext>;
 if (!bot) {
-    bot = new Telegraf(process.env.BOT_TOKEN);
+    bot = new Telegraf<MyWizardContext>(process.env.BOT_TOKEN!);
 
     
     bot.launch({
@@ -39,6 +41,17 @@ if (!bot) {
                         .catch((err) => console.error('Failed to set webhook:', err));
                 }
     }
+
+    // Register WizardScene
+    // Register the WizardScene
+    const stage = new Scenes.Stage<MyWizardContext>([awardWizard]);
+
+    // Use session middleware and ensure it works with MyWizardContext
+    bot.use(session());
+
+    // Use the stage middleware
+    bot.use(stage.middleware());
+
     setBotCommands(bot);
     addSampleCommand(bot);
 }
