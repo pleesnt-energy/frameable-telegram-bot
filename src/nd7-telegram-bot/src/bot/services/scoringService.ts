@@ -1,5 +1,5 @@
 import { Client } from '@notionhq/client';
-
+console.log('[scoring service] ',process.env.NOTION_API_KEY);
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
 const scoreboardDatabaseID = process.env.SCOREBOARD_DATABASE_ID;
 if (!scoreboardDatabaseID) {
