@@ -32,8 +32,8 @@ export const setBotCommands = (bot: Telegraf<Context<Update>>) => {
       bot.command("award", async (ctx) => {
 
         const username = ctx.message.text.split(" ")[1]; // `/award @username`
-
-        const senderUsername = ctx.from?.username;
+        
+        const senderUsername = ctx.message.from.username;
         if (!senderUsername) {
             return ctx.reply(`❌ Your username is missing! Make sure you're logged into Telegram.`);
         }
