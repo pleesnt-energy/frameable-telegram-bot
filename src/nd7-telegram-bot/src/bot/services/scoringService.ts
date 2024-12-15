@@ -8,6 +8,61 @@ if (!scoreboardDatabaseID) {
 }
 
 export const ScoreService = {
+
+    
+  // Function to tally goals and print a leaderboard
+  async tallyGoalsAndPrintLeaderboard() {
+
+    const plainLeaderboard = function(data:any[]){
+        let totalGoals = 0;
+        let top3: any[] = [];
+        data.forEach(item =>{
+            if(top3.length < 3){
+                top3.push(item.user ?? "no username");
+            }
+            totalGoals += (item.totalGoals);
+        })
+    
+        return `${totalGoals} scored ${top3[0]} in first place.`;
+    }
+    
+    try {
+        const response = await notion.databases.query({
+            database_id: scoreboardDatabaseID,
+            filter: {                
+                "property": "EventCategory",
+                "select": {
+                    "equals": "GoalAwarded"
+                }
+            }
+        });
+
+        const goalsByUser:any = {};
+
+        response.results.forEach((entry: any) => {
+            const target = entry.properties.Target.rich_text.map((text: { plain_text: string; }) => text.plain_text.trim()).join("");
+            
+            if (goalsByUser[target]) {
+                goalsByUser[target] += 1;
+            } else {
+                goalsByUser[target] = 1;
+            }
+        });
+
+        const formattedResults = Object.entries<any>(goalsByUser)
+                .filter(([user, goals]) => goals > 0)
+                .map(([user, goals]) => ({
+                    user: user,
+                    totalGoals: goals
+                }));
+
+        const leaderboard = plainLeaderboard(formattedResults); // Call to print the leaderboard
+        return {plain:leaderboard, raw:formattedResults};
+    } catch (error) {
+        console.error("Failed to tally goals:", error);
+    }
+  },
+
   async tallyGoals() {
     const goalsByUser: { [key: string]: number } = {};
     const response = await notion.databases.query({

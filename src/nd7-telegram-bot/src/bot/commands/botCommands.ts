@@ -22,8 +22,8 @@ export const setBotCommands = (bot: Telegraf<Context<Update>>) => {
     
     bot.command("score", async (ctx) => {
         try {
-          const leaderboard = await ScoreService.tallyGoals();
-          await ctx.reply(`🌟 Leaderboard 🌟\n${leaderboard.plain}`);
+          const leaderboard = await ScoreService.tallyGoalsAndPrintLeaderboard();
+          await ctx.reply(`🌟 Leaderboard 🌟\n${leaderboard?.plain}`);
         } catch(err: any){
             ctx.reply(`❌ Error fetching scoreboard: ${err.message}`);
         }
