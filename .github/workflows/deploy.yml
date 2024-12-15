@@ -34,18 +34,18 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
     # Check Notion Settings
-    - name: Check Notion Settings
+    - name: Notion Settings
       if: ${{ env.NOTION_API_KEY != '' }}
       run: |
-        echo "Checking Notion Settings"
-        SCOREBOARD_DATABASE_ID="${{ secrets.SCOREBOARD_DATABASE_ID }}"
+        echo "Checking if SCOREBOARD_DATABASE_ID exists"
+        SCOREBOARD_DATABASE_ID="${{ env.SCOREBOARD_DATABASE_ID }}"
 
         if [[ -z "$SCOREBOARD_DATABASE_ID" || "$SCOREBOARD_DATABASE_ID" == "<your-notion-db-id>" ]]; then
             echo "ERROR: SCOREBOARD_DATABASE_ID is either missing or equals '<your-notion-db-id>'" >&2
             exit 1
         fi
 
-        echo "Notion Settings Check [OK]"
+        echo "Notion Settings [OK]"
 
     - name: Check Notion API Key
       if: ${{ env.NOTION_API_KEY == '' }}
