@@ -45,7 +45,7 @@ jobs:
 
           echo "Notion Settings Check [OK]"
 
-    - if: ${{ env.super_secret == '' }}
+    - if: ${{ env.NOTION_API_KEY == '' }}
       run: |
         echo "ERROR: NOTION_API_KEY missing" >&2
         exit 1
