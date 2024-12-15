@@ -5,7 +5,7 @@ env:
   FUNCTION_APP_NAME: frameabletelegrambot # Your bot
   FUNCTION_APP_LOCATION: newzealandnorth
   APP_INSIGHTS_LOCATION: australiasoutheast
-  SCOREBOARD_DATABASE_ID: <your-notion-db-id> # Must be existing
+  SCOREBOARD_DATABASE_ID: 99b8d14f9a314ae88db45b300618af8c # Must be existing
   # secrets.BOT_TOKEN
   # secrets.AZURE_CREDENTIALS 
   # secrets.AZURE_CLIENT_ID 
