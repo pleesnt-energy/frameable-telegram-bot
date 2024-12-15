@@ -54,6 +54,9 @@ if (!bot) {
 
     setBotCommands(bot);
     addSampleCommand(bot);
+
+    // Command to enter `awardWizard`
+    bot.command("awardwiz", (ctx) => ctx.scene.enter("AWARD_WIZARD_SCENE_ID"));
 }
 
 // Lazy-load initialization in handler
