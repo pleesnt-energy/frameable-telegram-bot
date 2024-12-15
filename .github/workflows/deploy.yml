@@ -21,7 +21,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env: 
-      NOTION_API_KEY: "${{secrets.NOTION_API_KEY}}"
+      NOTION_API_KEY: "${{secrets.NOTION_API_TOKEN}}"
     steps:
     # Step 1: Check out the repository.
     - name: Checkout code
