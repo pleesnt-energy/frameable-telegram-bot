@@ -30,7 +30,7 @@ resource keyVaultSecret1 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 
 resource keyVaultSecret2 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: keyVault
-  name: 'NOTION-API-TOKEN'
+  name: 'NOTION-API-KEY'
   properties: {
     value: notionApiToken
   }
