@@ -53,6 +53,12 @@ jobs:
         echo "Please set NOTION_API_KEY secret" >&2
         exit 1
 
+    - name: Check Notion API Key
+      if: ${{ env.OPENAI_API_KEY == '' }}
+      run: |
+        echo "Please set OPENAI_API_KEY secret" >&2
+        exit 1
+
     # Step 3: Deploy Stage 1 (Initialize Resources).
     - name: Deploy Stage 1 (Foundational Components)
       run: |
@@ -124,7 +130,8 @@ jobs:
             functionAppName="${{env.FUNCTION_APP_NAME}}" \
             location="${{env.FUNCTION_APP_LOCATION}}" \
             botToken="${{ secrets.BOT_TOKEN }}" \
-            notionApiToken="${{ secrets.NOTION_API_TOKEN }}"
+            notionApiToken="${{ secrets.NOTION_API_TOKEN }}" \
+            openaiApiToken="${{ secrets.OPENAI_API_TOKEN }}"
 
     # Step 5.3: Finalize Function App Configuration.
     - name: Finalize Function App Key Vault Integration
