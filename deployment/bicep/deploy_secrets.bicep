@@ -14,6 +14,10 @@ param botToken string
 @secure()
 param notionApiToken string
 
+@description('OpenAi api token value')
+@secure()
+param openaiApiToken string
+
 // Reference the existing Key Vault deployed in Stage 1
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: '${functionAppName}-kv'
@@ -31,6 +35,14 @@ resource keyVaultSecret1 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
 resource keyVaultSecret2 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: keyVault
   name: 'NOTION-API-KEY'
+  properties: {
+    value: notionApiToken
+  }
+}
+
+resource keyVaultSecret3 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  parent: keyVault
+  name: 'OPENAI-API-KEY'
   properties: {
     value: notionApiToken
   }
