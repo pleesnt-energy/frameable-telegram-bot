@@ -6,6 +6,7 @@ import { setBotCommands } from './commands/botCommands';
 import { addSampleCommand } from './commands/sampleCommand';
 
 import awardWizard, { MyWizardContext } from "./commands/scenes/awardWizard";
+import openaiUrlToTextWizard, { OpenAiWizardContext } from "./commands/scenes/openaiUrlToTextWizard";
 
 // Load environment variables
 dotenv.config();
@@ -45,18 +46,22 @@ if (!bot) {
     // Register WizardScene
     // Register the WizardScene
     const stage = new Scenes.Stage<MyWizardContext>([awardWizard]);
+    const openaiUrlToText = new Scenes.Stage([openaiUrlToTextWizard]);
 
     // Use session middleware and ensure it works with MyWizardContext
     bot.use(session());
 
     // Use the stage middleware
     bot.use(stage.middleware());
+    bot.use(openaiUrlToText.middleware()); // the worlds a stage!
 
     setBotCommands(bot);
     addSampleCommand(bot);
 
     // Command to enter `awardWizard`
     bot.command("awardwiz", (ctx) => ctx.scene.enter("AWARD_WIZARD_SCENE_ID"));
+    // Command to enter `openaiUrlToTextWizard`
+    bot.command("urltotext", (ctx) => ctx.scene.enter("OPEN_AI_URL_TO_TEXT_SCENE"));
 }
 
 // Lazy-load initialization in handler
