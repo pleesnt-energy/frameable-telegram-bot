@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       NOTION_API_KEY: "${{secrets.NOTION_API_TOKEN}}"
+      OPENAI_API_KEY: "${{secrets.OPENAI_API_TOKEN}}"
     steps:
     # Step 1: Check out the repository.
     - name: Checkout code
@@ -50,13 +51,13 @@ jobs:
     - name: Check Notion API Key
       if: ${{ env.NOTION_API_KEY == '' }}
       run: |
-        echo "Please set NOTION_API_KEY secret" >&2
+        echo "Please set NOTION_API_TOKEN secret" >&2
         exit 1
 
-    - name: Check Notion API Key
+    - name: Check OpenAI API Key
       if: ${{ env.OPENAI_API_KEY == '' }}
       run: |
-        echo "Please set OPENAI_API_KEY secret" >&2
+        echo "Please set OPENAI_API_TOKEN secret" >&2
         exit 1
 
     # Step 3: Deploy Stage 1 (Initialize Resources).
