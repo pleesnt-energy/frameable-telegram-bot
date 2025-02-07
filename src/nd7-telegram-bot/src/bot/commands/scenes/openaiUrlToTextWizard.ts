@@ -30,7 +30,7 @@ askForUrl.on(message("text"), async (ctx) => {
 
   // Save valid URL to session
   ctx.scene.session.url = userUrl;
-  await ctx.reply("🔍 Got the URL! Let me extract text from it...");
+
   return ctx.wizard.next();
 });
 
@@ -47,6 +47,7 @@ const extractText = async (ctx: OpenAiWizardContext) => {
   
     try {
       // Extract text using helper function
+      await ctx.reply("🔍 Got the URL! Let me extract text from it...");
       const text = await extractTextFromUrl(url);
   
       if (!text || text.length === 0) {
@@ -115,7 +116,7 @@ async function handleAnalysis(ctx: OpenAiWizardContext, taskPrompt: string) {
     await ctx.reply(`✅ Here is the analysis result:\n\n${result}`);
   } catch (err:any) {
     console.error("OpenAI API Error:", err.message);
-    await ctx.reply("❌ Something went wrong processing your request. Try again later.");
+    await ctx.reply("❌ Something went wrong processing your request. Try again later."+ ` ${JSON.stringify(err)}` );
   } finally {
     return ctx.scene.leave(); // End the scene after analysis
   }
