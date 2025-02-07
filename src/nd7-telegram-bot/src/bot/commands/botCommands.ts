@@ -69,7 +69,7 @@ export const setBotCommands = <T extends Context>(bot: Telegraf<T>) => {
     bot.command('version', async (ctx) => {
         console.log('[DEBUG] Version command received!');
         try {
-            await ctx.reply(`👨‍💻🤓💾     v1.0.44`);
+            await ctx.reply(`👨‍💻🤓💾     v1.0.45`);
         } catch (error) {
             console.error('[ERROR] Failed to reply to /version command:', error);
         }

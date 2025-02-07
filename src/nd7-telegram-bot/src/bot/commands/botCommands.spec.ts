@@ -45,6 +45,6 @@ describe('Bot Command Handlers', () => {
         )[1]; // Callback function for `/version`
         versionHandler(mockContext);
 
-        expect(mockReply).toHaveBeenCalledWith('👨‍💻🤓💾     v1.0.44');
+        expect(mockReply).toHaveBeenCalledWith('👨‍💻🤓💾     v1.0.45');
     });
 });
