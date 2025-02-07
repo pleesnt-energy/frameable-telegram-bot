@@ -37,7 +37,7 @@ inputUrlStep.on(message("text"), async (ctx) => {
   // Store the URL in the session and proceed to text extraction
   ctx.scene.session.url = url;
   await ctx.reply("🔍 Extracting text from the webpage...\nThis may take a moment.");
-  ctx.wizard.next(); // FIX: Don't use `return` with `ctx.wizard.next()` to avoid unexpected async behavior
+  return ctx.wizard.next(); // FIX: Don't use `return` with `ctx.wizard.next()` to avoid unexpected async behavior
 });
 
 /**
@@ -74,11 +74,11 @@ const extractTextStep = async (ctx: TextAnalysisWizardContext) => {
       ])
     );
 
-    ctx.wizard.next(); // Move to the third step
+    return ctx.wizard.next(); // Move to the third step
   } catch (err) {
     console.error(err);
     await ctx.reply("❌ Failed to extract text from the webpage. Please check the URL or try again later.");
-    ctx.scene.leave();
+    return ctx.scene.leave();
   }
 };
 
@@ -135,7 +135,7 @@ async function handleOpenAIResponse(ctx: TextAnalysisWizardContext, promptIntro:
     // Properly clean up session data and terminate the scene
     ctx.scene.session.url = undefined;
     ctx.scene.session.extractedText = undefined;
-    ctx.scene.leave();
+    return ctx.scene.leave();
   }
 }
 

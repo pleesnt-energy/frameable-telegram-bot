@@ -64,13 +64,13 @@ if (!bot) {
     addSampleCommand(bot);
 
     // Command to enter `awardWizard`
-    bot.command("awardwiz", (ctx) => ctx.scene.enter("AWARD_WIZARD_SCENE_ID"));
+    bot.command("awardwiz", async (ctx) => await ctx.scene.enter("AWARD_WIZARD_SCENE_ID"));
     // Command to enter `openaiUrlToTextWizard`
-    bot.command("urltotext", (ctx) => ctx.scene.enter("OPEN_AI_URL_TO_TEXT_SCENE"));
+    bot.command("urltotext", async (ctx) => await ctx.scene.enter("OPEN_AI_URL_TO_TEXT_SCENE"));
     // Command to enter gpt wizard
-    bot.command("gptwizard", (ctx) => ctx.scene.enter("GPT_ASSISTANT_SCENE_ID"));
+    bot.command("gptwizard", async (ctx) => await ctx.scene.enter("GPT_ASSISTANT_SCENE_ID"));
     // Command to enter url to txt
-    bot.command("urltotxt", (ctx)=> ctx.scene.enter("TEXT_ANALYSIS_SCENE_ID"));
+    bot.command("urltotxt", async (ctx) => await ctx.scene.enter("TEXT_ANALYSIS_SCENE_ID"));
 
 }
 

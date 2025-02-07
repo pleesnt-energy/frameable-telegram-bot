@@ -23,14 +23,15 @@ const askForUrl = new Composer<OpenAiWizardContext>();
 askForUrl.on(message("text"), async (ctx) => {
   const url = ctx.message?.text?.trim();
 
-  // Check for End Phrases
-  const endPhrases = ["bye", "end", "quit", "stop"];
-  if (endPhrases.some((phrase) => url.toLowerCase().includes(phrase))) {
-    await ctx.reply("🛑 Url to text ended. Thank you!");
-    return ctx.scene.leave();
-  }
+  
 
   if (!isValidUrl(url)) {
+    // Check for End Phrases
+    const endPhrases = ["bye", "end", "quit", "stop"];
+    if (endPhrases.some((phrase) => url.toLowerCase().includes(phrase))) {
+      await ctx.reply("🛑 Url to text ended. Thank you!");
+      return ctx.scene.leave();
+    }
     await ctx.reply("❌ Invalid URL. Please try again with a valid URL.");
     return; // Stay on the current step
   }
@@ -76,7 +77,7 @@ async function extractText(ctx: OpenAiWizardContext) {
   } catch (err:any) {
     console.error("ExtractText Error:", err.message || err);
     await ctx.reply("❌ Text extraction failed. Please check the URL and try again.");
-    ctx.scene.leave(); // Terminate gracefully upon failure
+    return ctx.scene.leave(); // Terminate gracefully upon failure
   }
 }
 
@@ -121,7 +122,7 @@ async function performAnalysis(ctx: OpenAiWizardContext, promptIntro: string) {
     console.error("Error during analysis:", err);
     await ctx.reply("❌ An error occurred while analyzing the text. Please try again.");
   } finally {
-    ctx.scene.leave(); // Cleanup after task completion
+    return ctx.scene.leave(); // Cleanup after task completion
   }
 }
 
