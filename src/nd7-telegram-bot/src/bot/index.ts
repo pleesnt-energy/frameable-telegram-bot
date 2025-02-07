@@ -8,6 +8,7 @@ import { addSampleCommand } from './commands/sampleCommand';
 import awardWizard, { MyWizardContext } from "./commands/scenes/awardWizard";
 import openaiUrlToTextWizard, { OpenAiWizardContext } from "./commands/scenes/openaiUrlToTextWizard";
 import gptAssistantWizard, { GptWizardContext} from './commands/scenes/gptAssistantWizard';
+import textAnalysisWizard from './commands/scenes/textAnalysisWizard';
 
 // Load environment variables
 dotenv.config();
@@ -57,6 +58,7 @@ if (!bot) {
     bot.use(stage.middleware());
     bot.use(openaiUrlToText.middleware()); // the worlds a stage!
     bot.use(gptAssistantWizardStage.middleware());
+    bot.use(textAnalysisWizard.middleware());
 
     setBotCommands(bot);
     addSampleCommand(bot);
@@ -66,7 +68,10 @@ if (!bot) {
     // Command to enter `openaiUrlToTextWizard`
     bot.command("urltotext", (ctx) => ctx.scene.enter("OPEN_AI_URL_TO_TEXT_SCENE"));
     // Command to enter gpt wizard
-    bot.command("gptwizard", (ctx) => ctx.scene.enter("GPT_ASSISTANT_SCENE_ID"))
+    bot.command("gptwizard", (ctx) => ctx.scene.enter("GPT_ASSISTANT_SCENE_ID"));
+    // Command to enter url to txt
+    bot.command("urltotxt", (ctx)=> ctx.scene.enter("TEXT_ANALYSIS_SCENE_ID"));
+
 }
 
 // Lazy-load initialization in handler
