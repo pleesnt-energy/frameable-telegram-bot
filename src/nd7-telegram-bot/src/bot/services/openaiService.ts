@@ -5,7 +5,7 @@ const openai = new OpenAI({
   });
 
 // Define a type for the role to restrict it to valid values
-type ChatRole = 'user' | 'assistant' | 'system';
+export type ChatRole = 'user' | 'assistant' | 'system';
 
 /**
  * Communicate with OpenAI Chat API using the current chat history.
