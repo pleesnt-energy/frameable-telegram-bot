@@ -14,14 +14,7 @@ export interface OpenAiWizardContext extends Context {
   wizard: Scenes.WizardContextWizard<OpenAiWizardContext>;
 }
 
-/**
- * Entry Step 1: Welcome the user and set up session.
- */
-async function entryStepHandler(ctx: OpenAiWizardContext) {
-  await ctx.reply("Welcome to the URL-to-Text Wizard! Please type your URL.");
-  ctx.scene.session.extractedText = undefined; // Reset any stale session values
-  return ctx.wizard.next(); // Advance to the next step!
-}
+
 
 /**
  * Step 2: Collect the user-provided URL.
@@ -152,6 +145,15 @@ async function extractTextFromUrl(url: string): Promise<string> {
     .map((_, el) => $(el).text().trim())
     .get()
     .join("\n"); // Combine relevant sections into plain text
+}
+
+/**
+ * Entry Step 1: Welcome the user and set up session.
+ */
+async function entryStepHandler(ctx: OpenAiWizardContext) {
+  await ctx.reply("Welcome to the URL-to-Text Wizard! Please type your URL.");
+  ctx.scene.session.extractedText = undefined; // Reset any stale session values
+  return ctx.wizard.next(); // Advance to the next step!
 }
 
 /**
