@@ -20,7 +20,7 @@ export interface OpenAiWizardContext extends Context {
 async function entryStepHandler(ctx: OpenAiWizardContext) {
   await ctx.reply("Welcome to the URL-to-Text Wizard! Please type your URL.");
   ctx.scene.session.extractedText = undefined; // Reset any stale session values
-  ctx.wizard.next(); // Advance to the next step!
+  return ctx.wizard.next(); // Advance to the next step!
 }
 
 /**
@@ -29,6 +29,13 @@ async function entryStepHandler(ctx: OpenAiWizardContext) {
 const askForUrl = new Composer<OpenAiWizardContext>();
 askForUrl.on(message("text"), async (ctx) => {
   const url = ctx.message?.text?.trim();
+
+  // Check for End Phrases
+  const endPhrases = ["bye", "end", "quit", "stop"];
+  if (endPhrases.some((phrase) => url.toLowerCase().includes(phrase))) {
+    await ctx.reply("🛑 Conversation ended. Thank you!");
+    return ctx.scene.leave();
+  }
 
   if (!isValidUrl(url)) {
     await ctx.reply("❌ Invalid URL. Please try again with a valid URL.");
