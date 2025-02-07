@@ -14,10 +14,23 @@ export interface OpenAiWizardContext extends Context {
   scene: Scenes.SceneContextScene<OpenAiWizardContext, OpenAiWizardSession>;
   wizard: Scenes.WizardContextWizard<OpenAiWizardContext>;
 }
+
+// Step 1: Entry and Introduction
+const entryStepHandler = async (ctx: OpenAiWizardContext) => {
+  await ctx.reply(
+    "Url to text. Type your URL please"
+  );
+
+  // Initialize chat history at beginning
+  ctx.scene.session.extractedText = "";
+  return ctx.wizard.next(); // Move to Step 2 (Chat Loop)
+};
+
 /**
  * Step 1: Collect user-provided URL.
  */
 const askForUrl = new Composer<OpenAiWizardContext>();
+
 
 askForUrl.on(message("text"), async (ctx) => {
   const userUrl = ctx.message?.text.trim();
@@ -30,7 +43,7 @@ askForUrl.on(message("text"), async (ctx) => {
 
   // Save valid URL to session
   ctx.scene.session.url = userUrl;
-
+  await ctx.reply("🔍 Got the URL! Let me extract text from it...");
   return ctx.wizard.next();
 });
 
@@ -47,7 +60,6 @@ const extractText = async (ctx: OpenAiWizardContext) => {
   
     try {
       // Extract text using helper function
-      await ctx.reply("🔍 Got the URL! Let me extract text from it...");
       const text = await extractTextFromUrl(url);
   
       if (!text || text.length === 0) {
@@ -111,12 +123,12 @@ async function handleAnalysis(ctx: OpenAiWizardContext, taskPrompt: string) {
 
   try {
     // Send message history to OpenAI API
-    const result = await fetchOpenAIResponse([['user',`${taskPrompt}${extractedText}` ]]);
+    const result = await fetchOpenAIResponse([['user','message']]);
 
     await ctx.reply(`✅ Here is the analysis result:\n\n${result}`);
   } catch (err:any) {
     console.error("OpenAI API Error:", err.message);
-    await ctx.reply("❌ Something went wrong processing your request. Try again later."+ ` ${JSON.stringify(err)}` );
+    await ctx.reply("❌ Something went wrong processing your request. Try again later.");
   } finally {
     return ctx.scene.leave(); // End the scene after analysis
   }
@@ -150,6 +162,7 @@ async function extractTextFromUrl(url: string): Promise<string> {
  */
 export const openaiUrlToTextWizard = new Scenes.WizardScene(
   "OPEN_AI_URL_TO_TEXT_SCENE", // Unique ID for the scene
+  entryStepHandler,
   askForUrl, // Step 1: Collect URL
   extractText, // Step 2: Extract webpage content
   processText // Step 3: Analyze the content
