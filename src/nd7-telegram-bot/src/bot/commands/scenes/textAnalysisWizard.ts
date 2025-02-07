@@ -155,11 +155,18 @@ async function extractTextFromUrl(url: string): Promise<string> {
     .join("\n");
 }
 
+async function entryStepHandler(ctx: TextAnalysisWizardContext) {
+  await ctx.reply("Welcome to the URL-to-Txt Wizard! Please type your URL.");
+  ctx.scene.session.extractedText = undefined; // Reset any stale session values
+  return ctx.wizard.next(); // Advance to the next step!
+}
+
 /**
  * Scene Setup
  */
 export const textAnalysisWizard = new Scenes.WizardScene(
   "TEXT_ANALYSIS_SCENE_ID", // Scene ID
+  entryStepHandler,
   inputUrlStep, // Step 1: Collect URL
   extractTextStep, // Step 2: Extract content
   processTextStep // Step 3: Perform analysis
