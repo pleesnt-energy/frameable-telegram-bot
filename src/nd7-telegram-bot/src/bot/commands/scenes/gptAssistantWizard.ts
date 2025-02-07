@@ -69,10 +69,4 @@ export const gptAssistantWizard = new Scenes.WizardScene(
   chatStepHandler // Step 2: Chat Loop
 );
 
-gptAssistantWizard.command("end", async (ctx) =>{
-  await ctx.reply("🛑 Conversation ended. Thank you!");
-    ctx.scene.session.chatHistory = []; // Cleanup history
-    return ctx.scene.leave();
-})
-
 export default gptAssistantWizard;

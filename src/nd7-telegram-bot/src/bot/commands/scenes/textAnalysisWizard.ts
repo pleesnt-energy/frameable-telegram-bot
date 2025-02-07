@@ -179,4 +179,10 @@ export const textAnalysisWizard = new Scenes.WizardScene(
   processTextStep // Step 3: Perform analysis
 );
 
+textAnalysisWizard.command("end", async (ctx) =>{
+  await ctx.reply("🛑 Conversation ended. Thank you!");
+    ctx.scene.session.extractedText = undefined; // Cleanup history
+    return ctx.scene.leave();
+})
+
 export default textAnalysisWizard;
