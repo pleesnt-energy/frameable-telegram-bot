@@ -44,6 +44,6 @@ resource keyVaultSecret3 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
   parent: keyVault
   name: 'OPENAI-API-KEY'
   properties: {
-    value: notionApiToken
+    value: openaiApiToken
   }
 }
