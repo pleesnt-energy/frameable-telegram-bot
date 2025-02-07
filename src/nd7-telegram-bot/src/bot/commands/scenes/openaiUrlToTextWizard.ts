@@ -168,4 +168,10 @@ export const openaiUrlToTextWizard = new Scenes.WizardScene(
   processText // Step 4: Analyze extracted text
 );
 
+openaiUrlToTextWizard.command("end", async (ctx) =>{
+  await ctx.reply("🛑 Conversation ended. Thank you!");
+    ctx.scene.session.extractedText = undefined; // Cleanup history
+    return ctx.scene.leave();
+})
+
 export default openaiUrlToTextWizard;
