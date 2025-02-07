@@ -26,7 +26,7 @@ askForUrl.on(message("text"), async (ctx) => {
   // Check for End Phrases
   const endPhrases = ["bye", "end", "quit", "stop"];
   if (endPhrases.some((phrase) => url.toLowerCase().includes(phrase))) {
-    await ctx.reply("🛑 Conversation ended. Thank you!");
+    await ctx.reply("🛑 Url to text ended. Thank you!");
     return ctx.scene.leave();
   }
 

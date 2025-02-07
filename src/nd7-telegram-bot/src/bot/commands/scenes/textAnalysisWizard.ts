@@ -23,6 +23,13 @@ const inputUrlStep = new Composer<TextAnalysisWizardContext>();
 inputUrlStep.on(message("text"), async (ctx) => {
   const url = ctx.message?.text?.trim();
 
+    // Check for End Phrases
+    const endPhrases = ["bye", "end", "quit", "stop"];
+    if (endPhrases.some((phrase) => url.toLowerCase().includes(phrase))) {
+      await ctx.reply("🛑 Url to txt ended. Thank you!");
+      return ctx.scene.leave();
+    }
+
   if (!isValidUrl(url)) {
     return ctx.reply("❌ Invalid URL! Please send a valid URL.");
   }
