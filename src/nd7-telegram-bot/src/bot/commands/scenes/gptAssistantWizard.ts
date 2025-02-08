@@ -88,7 +88,7 @@ chatStepHandler.on(message("text"), async (ctx) => {
 
     // Send response to user
     const toggleView1 = ctx.scene.session.toggleView1;
-    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : botReply);
+    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : escapeMarkdown(botReply));
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
@@ -138,19 +138,19 @@ function escapeMarkdownV2(text: string): string {
 // Function to escape special characters for Markdown V2
 function escapeMarkdown(text:string) {
   return text
-    .replace(/_/g, '\\_') // Escape underscores
-    .replace(/\*/g, '\\*') // Escape asterisks
-    .replace(/~/g, '\\~') // Escape tildes
-    .replace(/`/g, '\\`') // Escape backticks
-    .replace(/>/g, '\\>') // Escape greater-than signs
-    .replace(/#/g, '\\#') // Escape hashtags
-    .replace(/\+/g, '\\+') // Escape plus signs
+    // .replace(/_/g, '\\_') // Escape underscores
+    // .replace(/\*/g, '\\*') // Escape asterisks
+    // .replace(/~/g, '\\~') // Escape tildes
+    // .replace(/`/g, '\\`') // Escape backticks
+    // .replace(/>/g, '\\>') // Escape greater-than signs
+    // .replace(/#/g, '\\#') // Escape hashtags
+    // .replace(/\+/g, '\\+') // Escape plus signs
     .replace(/-/g, '\\-') // Escape hyphens
-    .replace(/=/g, '\\=') // Escape equal signs
-    .replace(/\|/g, '\\|') // Escape pipes
-    .replace(/$$/g, '\\[') // Escape opening brackets     .replace(/$$/g, '\\]') // Escape closing brackets
-    .replace(/{/g, '\\{') // Escape opening braces
-    .replace(/}/g, '\\}') // Escape closing braces
+    // .replace(/=/g, '\\=') // Escape equal signs
+    // .replace(/\|/g, '\\|') // Escape pipes
+    // .replace(/$$/g, '\\[') // Escape opening brackets     .replace(/$$/g, '\\]') // Escape closing brackets
+    // .replace(/{/g, '\\{') // Escape opening braces
+    // .replace(/}/g, '\\}') // Escape closing braces
     .replace(/!/g, '\\!') // Escape exclamation marks
     .replace(/\./g, '\\.'); // Escape dots
 }
