@@ -58,7 +58,7 @@ if (!bot) {
     bot.use(stage.middleware());
     // bot.use(openaiUrlToText.middleware()); // the worlds a stage!
     bot.use(gptAssistantWizardStage.middleware());
-    // bot.use(textAnalysisWizard.middleware());
+    bot.use(textAnalysisWizard.middleware());
 
     setBotCommands(bot);
     addSampleCommand(bot);
@@ -66,7 +66,7 @@ if (!bot) {
     // Command to enter `awardWizard`
     bot.command("awardwiz", async (ctx) => await ctx.scene.enter("AWARD_WIZARD_SCENE_ID"));
     // Command to enter `openaiUrlToTextWizard`
-    // bot.command("urltotext", async (ctx) => await ctx.scene.enter("OPEN_AI_URL_TO_TEXT_SCENE"));
+    bot.command("urltotext", async (ctx) => await ctx.scene.enter("OPEN_AI_URL_TO_TEXT_SCENE"));
     // Command to enter gpt wizard
     bot.command("gptwizard", async (ctx) => await ctx.scene.enter("GPT_ASSISTANT_SCENE_ID"));
     // Command to enter url to txt
