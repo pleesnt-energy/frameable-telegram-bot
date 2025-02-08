@@ -44,8 +44,11 @@ chatStepHandler.on(message("text"), async (ctx) => {
     session.chatHistory.push(["assistant", botReply]);
 
     // Escape special characters for Markdown
-    const escapedReply = escapeNormalText(botReply);
+    const escapedReply = escapeMarkdownV2(botReply);
 
+    console.log("DEBUG - Raw Text:", botReply);
+    console.log("DEBUG - Escaped Text:", escapeMarkdownV2(botReply));
+    
     // Send response to user
     await ctx.replyWithMarkdownV2(escapedReply);
     return;
@@ -55,6 +58,15 @@ chatStepHandler.on(message("text"), async (ctx) => {
     return;
   }
 });
+
+
+function escapeMarkdownV2(text: string): string {
+  /**
+   * Safely escape special characters in Markdown V2 texts.
+   * Negative lookbehind prevents double-escaping characters starting with `\`.
+   */
+  return text.replace(/(?<!\\)([_*[\]()~`>#+\-=|{}.!])/g, '\\$1');
+}
 
 // Function to escape special characters for Markdown V2
 function escapeMarkdown(text:string) {
