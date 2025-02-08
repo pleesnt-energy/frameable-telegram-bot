@@ -5,6 +5,7 @@ import { message } from "telegraf/filters";
 interface AwardWizardSession extends Scenes.WizardSessionData {
   recipient?: string; // Stores username of the recipient
   token?: string;     // Stores token entered by the user
+  toggleView1 : boolean;
 }
 
 // Define custom Context that extends the WizardContext
@@ -98,7 +99,7 @@ export const awardWizard = new Scenes.WizardScene(
   async (ctx) => {
     // Step 1: Introduction
     await ctx.reply("👤 Who would you like to award a goal to? Provide their username (e.g., @username):");
-    return ctx.wizard.next(); // Move to Step 2
+    return ctx.wizard.next();
   },
   recipientStepHandler, // Step 2: Collect recipient
   tokenStepHandler,     // Step 3: Collect token

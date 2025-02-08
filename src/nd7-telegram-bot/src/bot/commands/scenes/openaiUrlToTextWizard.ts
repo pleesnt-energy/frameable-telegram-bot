@@ -7,6 +7,9 @@ import { fetchOpenAIResponse } from "../../services/openaiService";
 interface OpenAiWizardSession extends Scenes.WizardSessionData {
   url?: string; 
   extractedText?: string; 
+  recipient?: string; // Stores username of the recipient
+  token?: string;     // Stores token entered by the user
+  toggleView1: boolean;
 }
 
 export interface OpenAiWizardContext extends Context {
@@ -85,16 +88,25 @@ async function extractText(ctx: OpenAiWizardContext) {
 const processText = new Composer<OpenAiWizardContext>();
 
 processText.action("ANALYZE_SUM", async (ctx) => {
+  ctx.editMessageReplyMarkup({
+    inline_keyboard:[]
+  })
   await ctx.answerCbQuery(); // Acknowledge the button click
   await performAnalysis(ctx, "Summarize:\n\n");
 });
 
 processText.action("ANALYZE_KEY", async (ctx) => {
+  ctx.editMessageReplyMarkup({
+    inline_keyboard:[]
+  })
   await ctx.answerCbQuery();
   await performAnalysis(ctx, "Extract the most important keywords:\n\n");
 });
 
 processText.action("ANALYZE_SENT", async (ctx) => {
+  ctx.editMessageReplyMarkup({
+    inline_keyboard:[]
+  })
   await ctx.answerCbQuery();
   await performAnalysis(ctx, "Analyze the sentiment of this text:\n\n");
 });

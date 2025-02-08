@@ -6,6 +6,8 @@ import { ChatRole, fetchOpenAIResponse } from "../../services/openaiService"; //
 interface GptWizardSession extends Scenes.WizardSessionData {
   chatHistory?: [role: ChatRole, content: string][]; // Tracks the conversation for OpenAI
   toggleView1:boolean;
+  recipient?: string; // Stores username of the recipient
+  token?: string;     // Stores token entered by the user
 }
 
 // Define Custom Wizard Context
