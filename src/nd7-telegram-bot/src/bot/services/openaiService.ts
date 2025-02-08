@@ -20,15 +20,13 @@ export async function fetchOpenAIResponse(chatHistory: [ChatRole, string][]): Pr
       // Assuming 'name' is required, you can set it based on your application context
       name: role === 'user' ? 'User' : 'Assistant', // Example names, adjust as needed
     }));
-  
-    const requestBody = {
-      model: "gpt-4", // Use latest model
-      messages, // Use the mapped messages
-    };
+
+    
 
     const params: OpenAI.Chat.ChatCompletionCreateParams = {
-        messages: messages,
+        messages: [{role:"system" as ChatRole,content:"Answer your users queries as briefly as possible formatting replies in markdownv2 for telegram. You are agni akbanatab.",name:"System"},...messages],
         model: 'gpt-4o',
+        max_completion_tokens: 1024,
     };
   
     try {
