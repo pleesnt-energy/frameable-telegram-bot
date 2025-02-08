@@ -23,13 +23,6 @@ const inputUrlStep = new Composer<TextAnalysisWizardContext>();
 inputUrlStep.on(message("text"), async (ctx) => {
   const url = ctx.message?.text?.trim();
 
-    // Check for End Phrases
-    const endPhrases = ["bye", "end", "quit", "stop"];
-    if (endPhrases.some((phrase) => url.toLowerCase().includes(phrase))) {
-      await ctx.reply("🛑 Url to txt ended. Thank you!");
-      return ctx.scene.leave();
-    }
-
   if (!isValidUrl(url)) {
     return ctx.reply("❌ Invalid URL! Please send a valid URL.");
   }
@@ -182,7 +175,7 @@ export const textAnalysisWizard = new Scenes.WizardScene(
 textAnalysisWizard.command("end", async (ctx) =>{
   await ctx.reply("🛑 Conversation ended. Thank you!");
     ctx.scene.session.extractedText = undefined; // Cleanup history
-    return ctx.scene.leave();
+    return await ctx.scene.leave();
 })
 
 export default textAnalysisWizard;
