@@ -54,7 +54,7 @@ chatStepHandler.command("toggle", async (ctx) => {
   const toggle1 = ctx.scene.session.toggleView1; 
   ctx.scene.session.toggleView1 = !toggle1;
   await ctx.reply("Format toggled.");
-  return await ctx.scene.leave();
+  return; // do not leave scene
 });
 
 chatStepHandler.on(message("text"), async (ctx) => {
