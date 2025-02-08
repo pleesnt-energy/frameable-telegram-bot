@@ -47,7 +47,7 @@ chatStepHandler.on(message("text"), async (ctx) => {
     const escapedReply = escapeMarkdown(botReply);
 
     // Send response to user
-    await ctx.replyWithMarkdownV2(botReply);
+    await ctx.replyWithMarkdownV2(escapedReply);
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
