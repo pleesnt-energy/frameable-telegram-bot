@@ -59,23 +59,28 @@ chatStepHandler.on(message("text"), async (ctx) => {
 // Function to escape special characters for Markdown V2
 function escapeMarkdown(text:string) {
   return text
-    .replace(/_/g, '\\_') // Escape underscores
-    .replace(/\*/g, '\\*') // Escape asterisks
-    .replace(/~/g, '\\~') // Escape tildes
-    .replace(/`/g, '\\`') // Escape backticks
-    .replace(/>/g, '\\>') // Escape greater-than signs
-    .replace(/#/g, '\\#') // Escape hashtags
-    .replace(/\+/g, '\\+') // Escape plus signs
-    .replace(/-/g, '\\-') // Escape hyphens
-    .replace(/=/g, '\\=') // Escape equal signs
-    .replace(/\|/g, '\\|') // Escape pipes
-    .replace(/$$/g, '\\[') // Escape opening brackets     .replace(/$$/g, '\\]') // Escape closing brackets
-    .replace(/{/g, '\\{') // Escape opening braces
-    .replace(/}/g, '\\}') // Escape closing braces
-    .replace(/!/g, '\\!') // Escape exclamation marks
-    .replace(/\./g, '\\.'); // Escape dots
+    .replace(/_/g, '\_') // Escape underscores
+    .replace(/\*/g, '\*') // Escape asterisks
+    .replace(/~/g, '\~') // Escape tildes
+    .replace(/`/g, '\`') // Escape backticks
+    .replace(/>/g, '\>') // Escape greater-than signs
+    .replace(/#/g, '\#') // Escape hashtags
+    .replace(/\+/g, '\+') // Escape plus signs
+    .replace(/-/g, '\-') // Escape hyphens
+    .replace(/=/g, '\=') // Escape equal signs
+    .replace(/\|/g, '\|') // Escape pipes
+    .replace(/$$/g, '\[') // Escape opening brackets     .replace(/$$/g, '\\]') // Escape closing brackets
+    .replace(/{/g, '\{') // Escape opening braces
+    .replace(/}/g, '\}') // Escape closing braces
+    .replace(/!/g, '\!') // Escape exclamation marks
+    .replace(/\./g, '\.'); // Escape dots
 }
 
+// Function to escape only normal text while retaining Markdown formatting
+function escapeNormalText(text:string) {
+  // Escape characters that are not part of Markdown formatting
+  return text.replace(/([_`~*#!$$$$()<>|{}])/g, '\\$1'); // Escape Markdown special characters
+}
 
 // Step 1: Entry and Introduction
 const entryStepHandler = async (ctx: GptWizardContext) => {
