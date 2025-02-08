@@ -88,7 +88,7 @@ chatStepHandler.on(message("text"), async (ctx) => {
 
     // Send response to user
     const toggleView1 = ctx.scene.session.toggleView1;
-    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : escapeMarkdown(botReply));
+    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : (botReply));
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
