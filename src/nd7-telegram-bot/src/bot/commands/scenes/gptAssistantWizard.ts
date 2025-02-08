@@ -85,10 +85,11 @@ chatStepHandler.on(message("text"), async (ctx) => {
     console.log("DEBUG - Safe Text:", safeReply);
     console.log("DEBUG - Escaped Text:", escapedReply);
     console.log("DEBUG - Format:", wrappedReply);
+    console.log("DEBUG - MDToTelegram:", markdownToTelegramMarkdownV2(botReply))
 
     // Send response to user
     const toggleView1 = ctx.scene.session.toggleView1;
-    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : (botReply));
+    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : markdownToTelegramMarkdownV2(botReply));
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
@@ -96,6 +97,26 @@ chatStepHandler.on(message("text"), async (ctx) => {
     return;
   }
 });
+
+/**
+ * Translates regular Markdown to Telegram-compatible MarkdownV2.
+ */
+export function markdownToTelegramMarkdownV2(markdown: string): string {
+  // Escape Telegram MarkdownV2 reserved characters
+  const escapeTelegramChars = (text: string): string =>
+    text.replace(/([_*\[\]\(\)~`>#+\-=|{}.!])/g, '\\$1'); // All specials need escaping
+
+  // Handle basic Markdown-to-Telegram transformations
+  return markdown
+    .replace(/(\*\*|__)(.*?)\1/g, (_, p1, content) => `**${escapeTelegramChars(content)}**`) // Bold
+    .replace(/(\*|_)(.*?)\1/g, (_, p1, content) => `__${escapeTelegramChars(content)}__`) // Italics
+    .replace(/~~(.*?)~~/g, (_, content) => `~${escapeTelegramChars(content)}~`) // Strikethrough
+    .replace(/`([^`\n]+)`/g, (_, content) => `\`${escapeTelegramChars(content)}\``) // Inline code
+    .replace(/```([\s\S]*?)```/g, (_, content) => `\`\`\`${escapeTelegramChars(content)}\`\`\``) // Code blocks
+    .replace(/\[(.+?)\]\((.+?)\)/g, (_, text, url) => `[${escapeTelegramChars(text)}](${escapeTelegramChars(url)})`) // Links
+    .replace(/^(>+)(.*?)$/gm, (_, level, content) => `${'>'.repeat(level.length)} ${escapeTelegramChars(content.trim())}`) // Block quotes
+    .replace(/(?<!\\)!/g, '\\!'); // Avoid unescaped exclamation marks
+}
 
 /**
  * Escapes special MarkdownV2 characters in a given text.
