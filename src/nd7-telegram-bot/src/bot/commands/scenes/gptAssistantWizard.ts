@@ -1,6 +1,7 @@
 import { Composer, Context, Scenes, Markup } from "telegraf";
 import { message } from "telegraf/filters";
 import { ChatRole, fetchOpenAIResponse } from "../../services/openaiService"; // Custom OpenAI Service
+import MarkdownIt from "markdown-it";
 
 // Define Custom Wizard Session Data Structure
 interface GptWizardSession extends Scenes.WizardSessionData {
@@ -85,11 +86,11 @@ chatStepHandler.on(message("text"), async (ctx) => {
     // console.log("DEBUG - Safe Text:", safeReply);
     // console.log("DEBUG - Escaped Text:", escapedReply);
     // console.log("DEBUG - Format:", wrappedReply);
-    console.log("DEBUG - MDToTelegram:", transformMarkdown(botReply))
+    console.log("DEBUG - MDToTelegram:", markdownToTelegram(botReply))
 
     // Send response to user
     const toggleView1 = ctx.scene.session.toggleView1;
-    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : transformMarkdown(botReply));
+    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : markdownToTelegram(botReply));
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
@@ -97,6 +98,59 @@ chatStepHandler.on(message("text"), async (ctx) => {
     return;
   }
 });
+
+/**
+ * Transform Markdown text into Telegram MarkdownV2-compatible output.
+ */
+/**
+ * Convert Markdown to Telegram-friendly MarkdownV2.
+ */
+const markdownToTelegram = (markdown: string): string => {
+  const md = new MarkdownIt({
+    html: false, // Disable raw HTML
+    xhtmlOut: false, // Disable XHTML output
+    breaks: false, // Disable inserting <br> tags on single newlines
+  });
+
+  // Remove HTML wrappers (like <p>)
+  md.renderer.rules.paragraph_open = () => '';
+  md.renderer.rules.paragraph_close = () => '';
+
+  // Custom formatting rules for Telegram MarkdownV2
+  md.renderer.rules.strong_open = () => '**'; // Bold
+  md.renderer.rules.strong_close = () => '**';
+
+  md.renderer.rules.em_open = () => '__'; // Italic
+  md.renderer.rules.em_close = () => '__';
+
+  let href:string = "";
+  md.renderer.rules.link_open = (tokens, idx) => {
+    href = tokens[idx]?.attrs?.find(([attr]) => attr === 'href')?.[1] ?? "";
+    // console.log('href1? ',href);
+    return `[`; // Open link text
+  };  
+  md.renderer.rules.link_close = (tokens, idx) => {
+    // console.log('href2? ',href);
+    return `](${escapeTelegramMarkdown(href || '')})`;
+  };
+
+  md.renderer.rules.code_inline = (tokens, idx) => `\`${tokens[idx].content}\``; // Inline code
+  md.renderer.rules.code_block = (tokens, idx) => `\`\`\`\n${tokens[idx].content}\n\`\`\``; // Code blocks
+  md.renderer.rules.fence = (tokens, idx) => `\`\`\`\n${tokens[idx].content}\n\`\`\``; // Fenced code
+
+  md.renderer.rules.text = (tokens, idx) =>
+    escapeTelegramMarkdown(tokens[idx].content); // Escape raw text
+
+  return md.render(markdown).trim(); // Render Telegram-safe Markdown
+};
+
+/**
+ * Escape Telegram MarkdownV2 special characters.
+ * Ensures the output avoids breaking Telegram processing rules.
+ */
+const escapeTelegramMarkdown = (text: string): string => {
+  return text.replace(/([_*~`[\](){}>#+\-=|.!])/g, "\\$1");
+};
 
 const transformMarkdown = (text: string): string => {
   // Step 1: Correct any formatting issues in the raw text
