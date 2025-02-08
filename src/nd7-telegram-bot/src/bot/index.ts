@@ -56,9 +56,9 @@ if (!bot) {
 
     // Use the stage middleware
     bot.use(stage.middleware());
-    bot.use(openaiUrlToText.middleware()); // the worlds a stage!
+    // bot.use(openaiUrlToText.middleware()); // the worlds a stage!
     bot.use(gptAssistantWizardStage.middleware());
-    bot.use(textAnalysisWizard.middleware());
+    // bot.use(textAnalysisWizard.middleware());
 
     setBotCommands(bot);
     addSampleCommand(bot);
