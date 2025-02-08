@@ -122,6 +122,14 @@ const markdownToTelegram = (markdown: string): string => {
   md.renderer.rules.list_item_open = () => '🔹 '; // Add an emoji bullet point
   md.renderer.rules.list_item_close = () => '\n'; // New line after items
 
+  let orderedIndex = 0;
+  md.renderer.rules.ordered_list_open = () => {
+    orderedIndex = 0; // Reset index for a new ordered list
+    return '';
+  };
+  md.renderer.rules.list_item_open = () => `${++orderedIndex}. `; // Numbered item
+  md.renderer.rules.list_item_close = () => '\n'; // New line after items
+
    // Remove HTML wrappers (like <p>)
   md.renderer.rules.paragraph_open = () => '';
   md.renderer.rules.paragraph_close = () => '';
