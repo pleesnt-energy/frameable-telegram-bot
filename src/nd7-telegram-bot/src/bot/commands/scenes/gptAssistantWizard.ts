@@ -44,7 +44,7 @@ chatStepHandler.on(message("text"), async (ctx) => {
     session.chatHistory.push(["assistant", botReply]);
 
     // Escape special characters for Markdown
-    const escapedReply = escapeMarkdown(botReply);
+    const escapedReply = escapeNormalText(botReply);
 
     // Send response to user
     await ctx.replyWithMarkdownV2(escapedReply);
