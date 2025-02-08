@@ -121,13 +121,11 @@ const correctErrors = (text: string): string => {
   return text;
 };
 
-const link = (content: string | FmtString, url: string) =>
-  linkOrMention(content, { type: 'text_link', url })
+// const link = (content: string | FmtString, url: string) =>
+//   linkOrMention(content, { type: 'text_link', url })
 
-import { fmt as _fmt, FmtString, join } from "telegraf/format";
-import { linkOrMention } from "telegraf/typings/core/helpers/formatting";
-import { User } from "telegraf/types";
-import { fmt, bold, italic, quote, code, pre } from "telegraf/format";
+// import { linkOrMention } from "telegraf/typings/core/helpers/formatting";
+import { fmt, bold, italic, quote, code, pre, link } from "telegraf/format";
 
 const formatMarkdown = (components: Array<{ type: string; content: string }>): string => {
   return components
@@ -138,7 +136,7 @@ const formatMarkdown = (components: Array<{ type: string; content: string }>): s
         case "italic":
           return fmt`${italic(component.content)}`;
         case "link":
-          return fmt`${link(component.content, "https://telegram.org")}`;
+          return fmt`${link(component.content, "https://unprincely.com")}`;
         case "quote":
           return fmt`${quote(component.content)}`;
         case "inlineCode":
