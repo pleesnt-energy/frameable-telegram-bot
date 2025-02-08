@@ -112,7 +112,17 @@ const markdownToTelegram = (markdown: string): string => {
     breaks: false, // Disable inserting <br> tags on single newlines
   });
 
-  // Remove HTML wrappers (like <p>)
+  // Render `<ul>` and `<ol>` as plain text with custom emojis or dashes
+  md.renderer.rules.bullet_list_open = () => ''; // No need to render opening tag
+  md.renderer.rules.bullet_list_close = () => ''; // No need to render closing tag
+
+  md.renderer.rules.ordered_list_open = () => ''; // No need to render opening tag
+  md.renderer.rules.ordered_list_close = () => ''; // No need to render closing tag
+
+  md.renderer.rules.list_item_open = () => '🔹 '; // Add an emoji bullet point
+  md.renderer.rules.list_item_close = () => '\n'; // New line after items
+
+   // Remove HTML wrappers (like <p>)
   md.renderer.rules.paragraph_open = () => '';
   md.renderer.rules.paragraph_close = () => '';
 
