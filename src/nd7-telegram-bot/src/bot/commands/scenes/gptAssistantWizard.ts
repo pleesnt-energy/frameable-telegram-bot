@@ -5,6 +5,7 @@ import { ChatRole, fetchOpenAIResponse } from "../../services/openaiService"; //
 // Define Custom Wizard Session Data Structure
 interface GptWizardSession extends Scenes.WizardSessionData {
   chatHistory?: [role: ChatRole, content: string][]; // Tracks the conversation for OpenAI
+  toggleView1:boolean;
 }
 
 // Define Custom Wizard Context
@@ -47,6 +48,13 @@ chatStepHandler.command("end", async (ctx) => {
   return await ctx.scene.leave();
 });
 
+chatStepHandler.command("toggle", async (ctx) => {
+  const toggle1 = ctx.scene.session.toggleView1; 
+  ctx.scene.session.toggleView1 = !toggle1;
+  await ctx.reply("Format toggled.");
+  return await ctx.scene.leave();
+});
+
 chatStepHandler.on(message("text"), async (ctx) => {
   const userMessage = ctx.message?.text.trim();
   const session = ctx.scene.session;
@@ -67,15 +75,16 @@ chatStepHandler.on(message("text"), async (ctx) => {
     session.chatHistory.push(["assistant", botReply]);
 
     // Escape special characters for Markdown
-    const escapedReply = escapeMarkdownV2(botReply);
+    const escapedReply = formatMarkdownV2(botReply);
     const formattedReply = formatChatGPTResponseForTelegram(botReply);
 
     console.log("DEBUG - Raw Text:", botReply);
-    console.log("DEBUG - Escaped Text:", escapeMarkdownV2(botReply));
+    console.log("DEBUG - Escaped Text:", formatMarkdownV2(botReply));
     console.log("DEBUG - Format:", formatChatGPTResponseForTelegram(botReply));
 
     // Send response to user
-    await ctx.replyWithMarkdownV2(formattedReply);
+    const toggleView1 = ctx.scene.session.toggleView1;
+    await ctx.replyWithMarkdownV2(toggleView1 ? formattedReply : escapedReply);
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
