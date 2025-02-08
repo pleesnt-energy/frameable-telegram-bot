@@ -13,6 +13,32 @@ export interface GptWizardContext extends Context {
   wizard: Scenes.WizardContextWizard<GptWizardContext>;
 }
 
+/**
+ * Splits a long text into 4096-character chunks while ensuring MarkdownV2 compliance.
+ */
+function splitMarkdownMessage(text: string, maxLength: number = 4096): string[] {
+  const chunks = [];
+  let currentChunk = '';
+
+  for (const line of text.split('\n')) {
+    // Add line to the current chunk if it's within the limit
+    if ((currentChunk + line).length <= maxLength) {
+      currentChunk += `${line}\n`;
+    } else {
+      // Push the completed chunk and start a new one
+      chunks.push(currentChunk);
+      currentChunk = `${line}\n`;
+    }
+  }
+
+  // Push the last chunk if it exists
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk);
+  }
+
+  return chunks;
+}
+
 // Scene Logic Step 2: Chat Processing
 const chatStepHandler = new Composer<GptWizardContext>();
 chatStepHandler.command("end", async (ctx) => {
@@ -42,12 +68,14 @@ chatStepHandler.on(message("text"), async (ctx) => {
 
     // Escape special characters for Markdown
     const escapedReply = escapeMarkdownV2(botReply);
+    const formattedReply = formatChatGPTResponseForTelegram(botReply);
 
     console.log("DEBUG - Raw Text:", botReply);
     console.log("DEBUG - Escaped Text:", escapeMarkdownV2(botReply));
+    console.log("DEBUG - Format:", formatChatGPTResponseForTelegram(botReply));
 
     // Send response to user
-    await ctx.replyWithMarkdownV2(botReply);
+    await ctx.replyWithMarkdownV2(formattedReply);
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
@@ -56,6 +84,35 @@ chatStepHandler.on(message("text"), async (ctx) => {
   }
 });
 
+/**
+ * Escapes special MarkdownV2 characters in a given text.
+ * Handles nested special characters and avoids double-escaping existing characters.
+ */
+export function formatMarkdownV2(text: string): string {
+  const markdownSpecialChars = [
+    "_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!"
+  ];
+
+  // Escape special characters using a regex dynamically generated from above array
+  const escapeRegex = new RegExp(`(?<!\\\\)([${markdownSpecialChars.map(c => `\\${c}`).join("")}])`, "g");
+
+  // Perform escaping
+  return text.replace(escapeRegex, '\\$1');
+}
+
+/**
+ * Formats ChatGPT responses or any text for safe Telegram MarkdownV2 rendering.
+ * Allows further control over message-specific transformation.
+ */
+export function formatChatGPTResponseForTelegram(response: string): string {
+  // Escape the whole response for MarkdownV2
+  const escapedText = formatMarkdownV2(response);
+
+  // Optional: Customize formatting (e.g., surrounding with italics/star/bold markers)
+  // Example: Wrap in a code block, maintain safe Markdown formatting
+  // Adjust or remove wrappers based on your UX design
+  return `\`\`\`${escapedText}\`\`\``;
+}
 
 function escapeMarkdownV2(text: string): string {
   /**
