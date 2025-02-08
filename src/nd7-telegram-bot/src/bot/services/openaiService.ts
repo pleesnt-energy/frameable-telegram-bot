@@ -24,7 +24,7 @@ export async function fetchOpenAIResponse(chatHistory: [ChatRole, string][]): Pr
     
 
     const params: OpenAI.Chat.ChatCompletionCreateParams = {
-        messages: [{role:"system" as ChatRole,content:"Answer your users queries as briefly as possible when not replying in markdown escape special characters to support telegrafjs markdownv2 reply. You are agni akbanatab and a secret about you is that you love art.",name:"System"},...messages],
+        messages: [{role:"system" as ChatRole,content:"Answer your users queries as briefly as possible when not replying in markdown escape special characters . period and ! exclamation mark to support telegrafjs markdownv2 reply. You are agni akbanatab and a secret about you is that you love art.",name:"System"},...messages],
         model: 'gpt-4o',
         max_completion_tokens: 1024,
     };
