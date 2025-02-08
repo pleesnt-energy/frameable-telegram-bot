@@ -23,14 +23,12 @@ const askForUrl = new Composer<OpenAiWizardContext>();
 askForUrl.on(message("text"), async (ctx) => {
   const url = ctx.message?.text?.trim();
 
-  
-
   if (!isValidUrl(url)) {
     // Check for End Phrases
     const endPhrases = ["bye", "end", "quit", "stop"];
     if (endPhrases.some((phrase) => url.toLowerCase().includes(phrase))) {
       await ctx.reply("🛑 Url to text ended. Thank you!");
-      return ctx.scene.leave();
+      return await ctx.scene.leave();
     }
     await ctx.reply("❌ Invalid URL. Please try again with a valid URL.");
     return; // Stay on the current step
@@ -170,11 +168,5 @@ export const openaiUrlToTextWizard = new Scenes.WizardScene(
   extractText, // Step 3: Extract content
   processText // Step 4: Analyze extracted text
 );
-
-openaiUrlToTextWizard.command("end", async (ctx) =>{
-  await ctx.reply("🛑 Conversation ended. Thank you!");
-    ctx.scene.session.extractedText = undefined; // Cleanup history
-    return await ctx.scene.leave();
-})
 
 export default openaiUrlToTextWizard;
