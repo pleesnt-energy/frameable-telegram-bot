@@ -82,10 +82,10 @@ chatStepHandler.on(message("text"), async (ctx) => {
     const wrappedReply = formatChatGPTResponseForTelegram(botReply);
 
     console.log("DEBUG - Raw Text:", botReply);
-    console.log("DEBUG - Safe Text:", safeReply);
-    console.log("DEBUG - Escaped Text:", escapedReply);
-    console.log("DEBUG - Format:", wrappedReply);
-    console.log("DEBUG - MDToTelegram:", markdownToTelegramMarkdownV2(botReply))
+    // console.log("DEBUG - Safe Text:", safeReply);
+    // console.log("DEBUG - Escaped Text:", escapedReply);
+    // console.log("DEBUG - Format:", wrappedReply);
+    console.log("DEBUG - MDToTelegram:", transformMarkdown(botReply))
 
     // Send response to user
     const toggleView1 = ctx.scene.session.toggleView1;
