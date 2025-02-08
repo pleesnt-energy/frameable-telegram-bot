@@ -77,16 +77,18 @@ chatStepHandler.on(message("text"), async (ctx) => {
     session.chatHistory.push(["assistant", botReply]);
 
     // Escape special characters for Markdown
-    const escapedReply = formatMarkdownV2(botReply);
-    const formattedReply = formatChatGPTResponseForTelegram(botReply);
+    const escapedReply = escapeMarkdownV2(botReply);
+    const safeReply = formatMarkdownV2(botReply);
+    const wrappedReply = formatChatGPTResponseForTelegram(botReply);
 
     console.log("DEBUG - Raw Text:", botReply);
-    console.log("DEBUG - Escaped Text:", formatMarkdownV2(botReply));
-    console.log("DEBUG - Format:", formatChatGPTResponseForTelegram(botReply));
+    console.log("DEBUG - Safe Text:", safeReply);
+    console.log("DEBUG - Escaped Text:", escapedReply);
+    console.log("DEBUG - Format:", wrappedReply);
 
     // Send response to user
     const toggleView1 = ctx.scene.session.toggleView1;
-    await ctx.replyWithMarkdownV2(toggleView1 ? formattedReply : escapedReply);
+    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : botReply);
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
