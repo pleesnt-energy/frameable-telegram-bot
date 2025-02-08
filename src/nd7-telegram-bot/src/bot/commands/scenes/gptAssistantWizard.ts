@@ -89,7 +89,7 @@ chatStepHandler.on(message("text"), async (ctx) => {
 
     // Send response to user
     const toggleView1 = ctx.scene.session.toggleView1;
-    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : escapeMarkdown(markdownToTelegramMarkdownV2(botReply)));
+    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : transformMarkdown(botReply));
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
@@ -97,6 +97,85 @@ chatStepHandler.on(message("text"), async (ctx) => {
     return;
   }
 });
+
+const transformMarkdown = (text: string): string => {
+  // Step 1: Correct any formatting issues in the raw text
+  const correctedText = correctErrors(text);
+
+  // Step 2: Parse the corrected text into structured components
+  const parsedComponents = parseMarkdown(correctedText);
+
+  // Step 3: Format the parsed components into Telegram MarkdownV2
+  return formatMarkdown(parsedComponents);
+};
+
+const correctErrors = (text: string): string => {
+  // Fix unclosed bold/italic tags
+  text = text.replace(/(\*\*.*?)(?!\*\*)$/g, "$1**"); // Ensure bold ends with `**`
+  text = text.replace(/(__.*?)(?!__)$/g, "$1__"); // Ensure italics ends with `__`
+
+  // Normalize nested formatting
+  text = text.replace(/\*\*(.*?)__(.*?)\*\*/g, "**$1__$2**"); // Fix nested italic in bold
+  text = text.replace(/__(.*?)\*\*(.*?)__/g, "__$1**$2__"); // Fix nested bold in italics
+
+  return text;
+};
+
+const link = (content: string | FmtString, url: string) =>
+  linkOrMention(content, { type: 'text_link', url })
+
+import { fmt as _fmt, FmtString, join } from "telegraf/format";
+import { linkOrMention } from "telegraf/typings/core/helpers/formatting";
+import { User } from "telegraf/types";
+import { fmt, bold, italic, quote, code, pre } from "telegraf/format";
+
+const formatMarkdown = (components: Array<{ type: string; content: string }>): string => {
+  return components
+    .map((component) => {
+      switch (component.type) {
+        case "bold":
+          return fmt`${bold(component.content)}`;
+        case "italic":
+          return fmt`${italic(component.content)}`;
+        case "link":
+          return fmt`${link(component.content, "https://telegram.org")}`;
+        case "quote":
+          return fmt`${quote(component.content)}`;
+        case "inlineCode":
+          return fmt`${pre("typescript")(component.content)}`;
+        case "code":
+          return fmt`${code(component.content)}`;
+        default:
+          // Fallback for unknown text
+          return component.content;
+      }
+    })
+    .join("");
+};
+
+
+const parseMarkdown = (text: string): Array<{ type: string; content: string }> => {
+  const components: Array<{ type: string; content: string }> = [];
+
+  // Regexes for identifying Markdown components
+  const patterns = {
+    bold: /\*\*(.*?)\*\*/g, // Matches **bold** text
+    italic: /__(.*?)__/g, // Matches __italic__ text
+    link: /\[(.*?)\]\((.*?)\)/g, // Matches [text](url)
+    code: /```([\s\S]*?)```/g, // Matches ```code blocks```
+    inlineCode: /`([^`]+)`/g, // Matches `inline code`
+  };
+
+  // Extract matches for each Markdown type
+  for (const [type, regex] of Object.entries(patterns)) {
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      components.push({ type, content: match[1] });
+    }
+  }
+
+  return components;
+};
 
 /**
  * Translates regular Markdown to Telegram-compatible MarkdownV2.
