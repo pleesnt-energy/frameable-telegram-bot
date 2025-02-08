@@ -151,11 +151,14 @@ async function extractTextFromUrl(url: string): Promise<string> {
 /**
  * Entry Step 1: Welcome the user and set up session.
  */
-async function entryStepHandler(ctx: OpenAiWizardContext) {
-  await ctx.reply("Welcome to the URL-to-Text Wizard! Please type your URL.");
-  ctx.scene.session.extractedText = undefined; // Reset any stale session values
-  return ctx.wizard.next(); // Advance to the next step!
-}
+const entryStepHandler = new Scenes.BaseScene<OpenAiWizardContext>("greeter");
+
+entryStepHandler.enter(ctx => {
+  ctx.reply("Welcome to the URL-to-Text Wizard! Please type your URL. Type /end to cancel");
+  ctx.scene.session.extractedText = undefined;
+  ctx.wizard.next();
+});
+
 
 /**
  * Final Wizard Scene Export
@@ -171,7 +174,7 @@ export const openaiUrlToTextWizard = new Scenes.WizardScene(
 openaiUrlToTextWizard.command("end", async (ctx) =>{
   await ctx.reply("🛑 Conversation ended. Thank you!");
     ctx.scene.session.extractedText = undefined; // Cleanup history
-    return ctx.scene.leave();
+    return await ctx.scene.leave();
 })
 
 export default openaiUrlToTextWizard;
