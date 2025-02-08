@@ -15,6 +15,11 @@ export interface GptWizardContext extends Context {
 
 // Scene Logic Step 2: Chat Processing
 const chatStepHandler = new Composer<GptWizardContext>();
+chatStepHandler.command("end", async (ctx) => {
+  await ctx.reply("🛑 Conversation ended. Thank you!");
+  ctx.scene.session.chatHistory = []; // Cleanup history
+  return await ctx.scene.leave();
+});
 
 chatStepHandler.on(message("text"), async (ctx) => {
   const userMessage = ctx.message?.text.trim();
@@ -23,14 +28,6 @@ chatStepHandler.on(message("text"), async (ctx) => {
   // Initialize chatHistory if it doesn't exist
   if (!session.chatHistory) {
     session.chatHistory = [];
-  }
-
-  // Check for End Phrases
-  const endPhrases = ["bye", "end", "quit", "stop"];
-  if (endPhrases.some((phrase) => userMessage.toLowerCase().includes(phrase))) {
-    await ctx.reply("🛑 Conversation ended. Thank you!");
-    session.chatHistory = []; // Cleanup history
-    return ctx.scene.leave();
   }
 
   // Add user message to chatHistory
