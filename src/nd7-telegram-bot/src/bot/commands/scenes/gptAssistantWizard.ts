@@ -44,10 +44,12 @@ chatStepHandler.on(message("text"), async (ctx) => {
     session.chatHistory.push(["assistant", botReply]);
 
     // Send response to user
-    await ctx.reply(botReply);
+    await ctx.replyWithMarkdownV2(botReply);
+    return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
     await ctx.reply("❌ There was an error processing your request. Please try again.");
+    return;
   }
 });
 
