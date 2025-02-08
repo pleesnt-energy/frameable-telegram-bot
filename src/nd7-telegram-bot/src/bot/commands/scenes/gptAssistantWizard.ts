@@ -47,7 +47,7 @@ chatStepHandler.on(message("text"), async (ctx) => {
     const escapedReply = escapeNormalText(botReply);
 
     // Send response to user
-    await ctx.replyWithMarkdownV2(escapedReply);
+    await ctx.reply(escapedReply);
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
@@ -79,7 +79,7 @@ function escapeMarkdown(text:string) {
 // Function to escape only normal text while retaining Markdown formatting
 function escapeNormalText(text:string) {
   // Escape characters that are not part of Markdown formatting
-  return text.replace(/([_`~*#!$$$$()<>|{}])/g, '\\$1'); // Escape Markdown special characters
+  return text.replace(/([_`~*#!$$$$()<>|{}\.])/g, '\\$1'); // Escape Markdown special characters
 }
 
 // Step 1: Entry and Introduction
