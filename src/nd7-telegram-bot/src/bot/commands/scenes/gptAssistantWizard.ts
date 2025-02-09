@@ -133,7 +133,7 @@ const markdownToTelegram = (markdown: string): string => {
   // Rule for start of a bullet list block
   md.renderer.rules.bullet_list_open = () => {
     listContext = 'bullet_list'; // Set context for unordered list
-    return ''; // No opening tag needed
+    return '\n'; // No opening tag needed
   };
 
   // Rule for end of a bullet list block
@@ -146,7 +146,7 @@ const markdownToTelegram = (markdown: string): string => {
   md.renderer.rules.ordered_list_open = () => {
     listContext = 'ordered_list'; // Set context for ordered list
     orderedIndex = 0; // Reset numbering
-    return ''; // No opening tag needed
+    return '\n'; // No opening tag needed
   };
 
   // Rule for end of an ordered list block
@@ -190,14 +190,24 @@ const markdownToTelegram = (markdown: string): string => {
  * Escapes Telegram MarkdownV2-specific special characters while leaving valid Markdown formatting intact.
  */
 const escapeTelegramMarkdown = (text: string): string => {
-  const specialChars = /([_*~`[\](){}>#+\-=|!\.])/g; // Characters to escape
+  const specialChars = /([_*~`[\](){}><#+\-=|.!])/g;
 
-  // Escape them unless they are part of already valid Markdown
   return text.replace(specialChars, (char, index, fullStr) => {
-    if (isInsideValidMarkdown(fullStr, index)) {
-      return char; // Leave valid formatting markers alone
+    // console.log(`Processing character: ${char}, Context: "${fullStr}" at index: ${index}`);
+
+    // Log to detect accidental double escaping
+    if (char === '.') {
+      // console.log(`Encountered period (.) at index ${index}: "${fullStr}"`);
     }
-    return `\\${char}`; // Escape others
+
+    // Verify if inside valid Markdown (e.g., links, bold, code blocks)
+    if (isInsideValidMarkdown(fullStr, index)) {
+      // console.log(`Skipping escape inside valid Markdown for: ${char}`);
+      return char; // No escaping needed for valid Markdown
+    }
+
+    console.log(`Escaping character: ${char}`);
+    return `\\${char}`; // Default case: escape special characters
   });
 };
 
