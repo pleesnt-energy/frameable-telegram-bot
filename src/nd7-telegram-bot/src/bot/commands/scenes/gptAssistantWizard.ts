@@ -109,6 +109,9 @@ const markdownToTelegram = (markdown: string): string => {
     breaks: false, // Disable <br> on single newline
   });
 
+  // Horizontal Rule: Render `hr` as `------` instead of <hr>
+  md.renderer.rules.hr = () => '------\n';
+
   // Track context for list types during rendering
   let listContext = ''; // Can be 'bullet_list' or 'ordered_list'
   let orderedIndex = 0; // Tracks numbering for ordered lists
