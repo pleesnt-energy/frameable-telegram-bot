@@ -109,6 +109,10 @@ const markdownToTelegram = (markdown: string): string => {
     breaks: false, // Disable <br> on single newline
   });
 
+  // Custom Rule for <br>: Treat as explicit line breaks (`\n`)
+  md.renderer.rules.hardbreak = () => '\n'; // Replace `<br>` with newline
+  md.renderer.rules.softbreak = () => '\n'; // Softbreak as newline
+
   // Custom Rule: Replace Headers (e.g., `### Heading`) with Bold Text
   md.renderer.rules.heading_open = (tokens, idx) => {
     const token = tokens[idx];
