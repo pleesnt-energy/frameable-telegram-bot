@@ -119,7 +119,7 @@ const markdownToTelegram = (markdown: string): string => {
       return '🔹 '; // Prefix with emoji for unordered lists
     }
     if (listContext === 'ordered_list') {
-      return `${++orderedIndex}. `; // Prefix with number for ordered lists
+      return `${++orderedIndex}\\. `; // Prefix with number for ordered lists
     }
     return ''; // Fallback (shouldn't reach here)
   };
