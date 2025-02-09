@@ -109,6 +109,22 @@ const markdownToTelegram = (markdown: string): string => {
     breaks: false, // Disable <br> on single newline
   });
 
+  // Custom Rule: Replace Headers (e.g., `### Heading`) with Bold Text
+  md.renderer.rules.heading_open = (tokens, idx) => {
+    const token = tokens[idx];
+    if (token.tag === 'h1' || token.tag === 'h2' || token.tag === 'h3') {
+      return '**'; // Open heading as bold
+    }
+    return ''; // Fallback
+  };
+  md.renderer.rules.heading_close = (tokens, idx) => {
+    const token = tokens[idx];
+    if (token.tag === 'h1' || token.tag === 'h2' || token.tag === 'h3') {
+      return '**\n'; // Close heading with bold and newline
+    }
+    return '\n'; // Fallback
+  };
+  
   // Horizontal Rule: Render `hr` as `------` instead of <hr>
   md.renderer.rules.hr = () => '------\n';
 
