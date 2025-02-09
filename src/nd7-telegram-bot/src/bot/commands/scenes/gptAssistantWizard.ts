@@ -78,7 +78,7 @@ chatStepHandler.on(message("text"), async (ctx) => {
     session.chatHistory.push(["assistant", botReply]);
 
     // Escape special characters for Markdown
-    const escapedReply = escapeMarkdownV2(botReply);
+    const escapedReply = markdownToTelegram(botReply);
     const safeReply = formatMarkdownV2(botReply);
     const wrappedReply = formatChatGPTResponseForTelegram(botReply);
 
@@ -86,11 +86,11 @@ chatStepHandler.on(message("text"), async (ctx) => {
     // console.log("DEBUG - Safe Text:", safeReply);
     // console.log("DEBUG - Escaped Text:", escapedReply);
     // console.log("DEBUG - Format:", wrappedReply);
-    console.log("DEBUG - MDToTelegram:", markdownToTelegram(botReply))
+    console.log("DEBUG - MDToTelegram:", escapedReply)
 
     // Send response to user
     const toggleView1 = ctx.scene.session.toggleView1;
-    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : markdownToTelegram(botReply));
+    await ctx.replyWithMarkdownV2(toggleView1 ? safeReply : escapedReply);
     return;
   } catch (error) {
     console.error("Error communicating with OpenAI:", error);
@@ -113,18 +113,18 @@ const markdownToTelegram = (markdown: string): string => {
   md.renderer.rules.heading_open = (tokens, idx) => {
     const token = tokens[idx];
     if (token.tag === 'h1' || token.tag === 'h2' || token.tag === 'h3') {
-      return '**'; // Open heading as bold
+      return '**'; // Open heading as bold with a new line
     }
     return ''; // Fallback
   };
   md.renderer.rules.heading_close = (tokens, idx) => {
     const token = tokens[idx];
     if (token.tag === 'h1' || token.tag === 'h2' || token.tag === 'h3') {
-      return '**\n'; // Close heading with bold and newline
+      return '**\n\n'; // Close heading with bold and newline
     }
     return '\n'; // Fallback
   };
-  
+
   // Horizontal Rule: Render `hr` as `------` instead of <hr>
   md.renderer.rules.hr = () => '------\n';
 
@@ -222,7 +222,7 @@ const escapeTelegramMarkdown = (text: string): string => {
       return char; // No escaping needed for valid Markdown
     }
 
-    console.log(`Escaping character: ${char}`);
+    // console.log(`Escaping character: ${char}`);
     return `\\${char}`; // Default case: escape special characters
   });
 };
