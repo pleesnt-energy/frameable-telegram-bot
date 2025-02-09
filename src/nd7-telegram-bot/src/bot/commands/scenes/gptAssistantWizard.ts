@@ -102,72 +102,120 @@ chatStepHandler.on(message("text"), async (ctx) => {
 /**
  * Transform Markdown text into Telegram MarkdownV2-compatible output.
  */
-/**
- * Convert Markdown to Telegram-friendly MarkdownV2.
- */
 const markdownToTelegram = (markdown: string): string => {
   const md = new MarkdownIt({
     html: false, // Disable raw HTML
-    xhtmlOut: false, // Disable XHTML output
-    breaks: false, // Disable inserting <br> tags on single newlines
+    xhtmlOut: false, // Disable XHTML-style output
+    breaks: false, // Disable <br> on single newline
   });
 
-  // Render `<ul>` and `<ol>` as plain text with custom emojis or dashes
-  md.renderer.rules.bullet_list_open = () => ''; // No need to render opening tag
-  md.renderer.rules.bullet_list_close = () => ''; // No need to render closing tag
+  // Track context for list types during rendering
+  let listContext = ''; // Can be 'bullet_list' or 'ordered_list'
+  let orderedIndex = 0; // Tracks numbering for ordered lists
 
-  md.renderer.rules.ordered_list_open = () => ''; // No need to render opening tag
-  md.renderer.rules.ordered_list_close = () => ''; // No need to render closing tag
-
-  md.renderer.rules.list_item_open = () => '🔹 '; // Add an emoji bullet point
-  md.renderer.rules.list_item_close = () => '\n'; // New line after items
-
-  let orderedIndex = 0;
-  md.renderer.rules.ordered_list_open = () => {
-    orderedIndex = 0; // Reset index for a new ordered list
-    return '';
+  // Rule for start of a list item
+  md.renderer.rules.list_item_open = (tokens, idx) => {
+    if (listContext === 'bullet_list') {
+      return '🔹 '; // Prefix with emoji for unordered lists
+    }
+    if (listContext === 'ordered_list') {
+      return `${++orderedIndex}. `; // Prefix with number for ordered lists
+    }
+    return ''; // Fallback (shouldn't reach here)
   };
-  md.renderer.rules.list_item_open = () => `${++orderedIndex}. `; // Numbered item
-  md.renderer.rules.list_item_close = () => '\n'; // New line after items
 
-   // Remove HTML wrappers (like <p>)
-  md.renderer.rules.paragraph_open = () => '';
-  md.renderer.rules.paragraph_close = () => '';
+  // Rule for end of list item
+  md.renderer.rules.list_item_close = () => '\n'; // Add newline after list item
 
-  // Custom formatting rules for Telegram MarkdownV2
+  // Rule for start of a bullet list block
+  md.renderer.rules.bullet_list_open = () => {
+    listContext = 'bullet_list'; // Set context for unordered list
+    return ''; // No opening tag needed
+  };
+
+  // Rule for end of a bullet list block
+  md.renderer.rules.bullet_list_close = () => {
+    listContext = ''; // Clear context after list ends
+    return ''; // No closing tag needed
+  };
+
+  // Rule for start of an ordered list block
+  md.renderer.rules.ordered_list_open = () => {
+    listContext = 'ordered_list'; // Set context for ordered list
+    orderedIndex = 0; // Reset numbering
+    return ''; // No opening tag needed
+  };
+
+  // Rule for end of an ordered list block
+  md.renderer.rules.ordered_list_close = () => {
+    listContext = ''; // Clear context after list ends
+    return ''; // No closing tag needed
+  };
+
+  // Inline or Paragraph Wrapping
+  md.renderer.rules.paragraph_open = () => ''; // Remove <p>
+  md.renderer.rules.paragraph_close = () => ''; // Remove </p>
+
+  // Bold and Italic Text
   md.renderer.rules.strong_open = () => '**'; // Bold
   md.renderer.rules.strong_close = () => '**';
-
   md.renderer.rules.em_open = () => '__'; // Italic
   md.renderer.rules.em_close = () => '__';
 
-  let href:string = "";
+  // Links
+  let href: string = '';
   md.renderer.rules.link_open = (tokens, idx) => {
-    href = tokens[idx]?.attrs?.find(([attr]) => attr === 'href')?.[1] ?? "";
-    // console.log('href1? ',href);
-    return `[`; // Open link text
-  };  
-  md.renderer.rules.link_close = (tokens, idx) => {
-    // console.log('href2? ',href);
-    return `](${escapeTelegramMarkdown(href || '')})`;
+    href = tokens[idx]?.attrs?.find(([attr]) => attr === 'href')?.[1] ?? '';
+    return '['; // Opening
   };
+  md.renderer.rules.link_close = () => `](${escapeTelegramMarkdown(href)})`; // Closing
 
-  md.renderer.rules.code_inline = (tokens, idx) => `\`${tokens[idx].content}\``; // Inline code
-  md.renderer.rules.code_block = (tokens, idx) => `\`\`\`\n${tokens[idx].content}\n\`\`\``; // Code blocks
-  md.renderer.rules.fence = (tokens, idx) => `\`\`\`\n${tokens[idx].content}\n\`\`\``; // Fenced code
+  // Inline Code
+  md.renderer.rules.code_inline = (tokens, idx) => `\`${tokens[idx].content}\``;
 
-  md.renderer.rules.text = (tokens, idx) =>
-    escapeTelegramMarkdown(tokens[idx].content); // Escape raw text
+  // Code Blocks
+  md.renderer.rules.fence = (tokens, idx) => `\n\`\`\`\n${tokens[idx].content.trim()}\n\`\`\`\n`;
 
-  return md.render(markdown).trim(); // Render Telegram-safe Markdown
+  // Escape Raw Text
+  md.renderer.rules.text = (tokens, idx) => escapeTelegramMarkdown(tokens[idx].content);
+
+  // Render Markdown
+  return md.render(markdown).trim();
 };
 
 /**
- * Escape Telegram MarkdownV2 special characters.
- * Ensures the output avoids breaking Telegram processing rules.
+ * Escapes Telegram MarkdownV2-specific special characters while leaving valid Markdown formatting intact.
  */
 const escapeTelegramMarkdown = (text: string): string => {
-  return text.replace(/([_*~`[\](){}>#+\-=|.!])/g, "\\$1");
+  const specialChars = /([_*~`[\](){}>#+\-=|])/g; // Characters to escape
+
+  // Escape them unless they are part of already valid Markdown
+  return text.replace(specialChars, (char, index, fullStr) => {
+    if (isInsideValidMarkdown(fullStr, index)) {
+      return char; // Leave valid formatting markers alone
+    }
+    return `\\${char}`; // Escape others
+  });
+};
+
+/**
+ * Determines whether a character lies within valid Markdown formatting.
+ */
+const isInsideValidMarkdown = (text: string, offset: number): boolean => {
+  try {
+    // Check Bold (**Text**)
+    if (text.slice(offset - 2, offset + 2).match(/\*\*(.*?)\*\*/)) return true;
+
+    // Check Italics (__Text__)
+    if (text.slice(offset - 2, offset + 2).match(/__(.*?)__/)) return true;
+
+    // Check Links [Text](URL)
+    if (text.slice(offset - 1, offset + 1).match(/\[(.*?)\]\((.*?)\)/)) return true;
+
+    return false; // Not valid Markdown
+  } catch (err) {
+    return false; // On error, assume not valid formatting
+  }
 };
 
 const transformMarkdown = (text: string): string => {
