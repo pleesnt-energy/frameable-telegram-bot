@@ -187,7 +187,7 @@ const markdownToTelegram = (markdown: string): string => {
  * Escapes Telegram MarkdownV2-specific special characters while leaving valid Markdown formatting intact.
  */
 const escapeTelegramMarkdown = (text: string): string => {
-  const specialChars = /([_*~`[\](){}>#+\-=|!])/g; // Characters to escape
+  const specialChars = /([_*~`[\](){}>#+\-=|!\.])/g; // Characters to escape
 
   // Escape them unless they are part of already valid Markdown
   return text.replace(specialChars, (char, index, fullStr) => {
