@@ -109,6 +109,64 @@ const markdownToTelegram = (markdown: string): string => {
     breaks: false, // Disable <br> on single newline
   });
 
+  let _markdown = sanitizeHTML(markdown);
+    // Override Blockquote Tokens for Telegram MarkdownV2
+  md.renderer.rules.blockquote_open = () => '> '; // Markdown blockquote syntax (start blockquote)
+  md.renderer.rules.blockquote_close = () => '\n'; // End blockquote, add newline
+
+  // Correctly Render Text Tokens Inside Blockquotes
+  md.renderer.rules.text = (tokens, idx, options, env, slf) => {
+    const token = tokens[idx];
+    if (token.content && tokens[idx - 1]?.type === 'blockquote_open') {
+      // Render blockquote content using fmt.quote for clean output
+      return fmt`${quote(token.content.trim())}`.text;
+    }
+    return escapeTelegramMarkdown(token.content); // Escape raw text otherwise
+  };
+ 
+   // Custom Spoiler Rule Using `||...||` or `[spoiler]...[/spoiler]`
+   md.inline.ruler.push('spoiler', (state, silent) => {
+    const start = state.pos;
+  
+    // Ensure the string starts with `[spoiler]`
+    if (state.src.slice(start, start + 9) === '[spoiler]') {
+      const end = state.src.indexOf('[/spoiler]', start + 9);
+      if (end === -1) return false; // Missing closing tag
+  
+      if (!silent) {
+        // Create `spoiler_open` token
+        const spoilerOpenToken = state.push('spoiler_open', '', 1); // `1` means opening token
+        spoilerOpenToken.level = state.level;
+  
+        // Create `text` token
+        const contentToken = state.push('text', '', 0); // `0` means inline token (no nesting change)
+        contentToken.content = state.src.slice(start + 9, end);
+        contentToken.level = state.level + 1;
+  
+        // Create `spoiler_close` token
+        const spoilerCloseToken = state.push('spoiler_close', '', -1); // `-1` means closing token
+        spoilerCloseToken.level = state.level;
+      }
+  
+      // Update state position to skip the `[spoiler]...[/spoiler]` block
+      state.pos = end + 10; // Move past the `[/spoiler]` tag
+      return true;
+    }
+  
+    return false;
+  });
+ 
+   // Render Spoiler Tokens
+   md.renderer.rules.spoiler_open = () => ''; // No Telegram-specific marker needed
+   md.renderer.rules.spoiler_close = () => ''; // No Telegram-specific marker needed
+   md.renderer.rules.text = (tokens, idx, options, env, slf) => {
+     const token = tokens[idx];
+     if (tokens[idx - 1]?.type === 'spoiler_open' && tokens[idx + 1]?.type === 'spoiler_close') {
+       return fmt`${spoiler(token.content)}`.text; // Use Telegram's `||spoiler||` formatting
+     }
+     return escapeTelegramMarkdown(token.content); // Render normal text
+   };
+
   // Custom Rule for <br>: Treat as explicit line breaks (`\n`)
   md.renderer.rules.hardbreak = () => '\n'; // Replace `<br>` with newline
   md.renderer.rules.softbreak = () => '\n'; // Softbreak as newline
@@ -203,7 +261,18 @@ const markdownToTelegram = (markdown: string): string => {
   md.renderer.rules.text = (tokens, idx) => escapeTelegramMarkdown(tokens[idx].content);
 
   // Render Markdown
-  return md.render(markdown).trim();
+  return md.render(_markdown).trim();
+};
+
+/**
+ * Sanitize input by replacing raw HTML tags with Markdown-compatible syntax.
+ */
+const sanitizeHTML = (markdown: string): string => {
+  return markdown
+    .replace(/<blockquote>/gi, '> ') // Replace `<blockquote>` with Markdown blockquote syntax
+    .replace(/<\/blockquote>/gi, '\n') // Replace closing `</blockquote>` with newline
+    .replace(/\[spoiler\](.*?)\[\/spoiler\]/gi, '||$1||') // Replace `[spoiler]...[/spoiler]` with Telegram `||spoiler||`
+    .replace(/<[^>]+>/g, ''); // Strip any other remaining HTML tags
 };
 
 /**
@@ -278,7 +347,7 @@ const correctErrors = (text: string): string => {
 //   linkOrMention(content, { type: 'text_link', url })
 
 // import { linkOrMention } from "telegraf/typings/core/helpers/formatting";
-import { fmt, bold, italic, quote, code, pre, link } from "telegraf/format";
+import { fmt, bold, italic, quote, code, pre, link, spoiler } from "telegraf/format";
 
 const formatMarkdown = (components: Array<{ type: string; content: string }>): string => {
   return components
