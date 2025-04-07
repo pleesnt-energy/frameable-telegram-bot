@@ -20,6 +20,10 @@
    - Install the Azure Functions CLI: [Installation Guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools).
 3. Telegram Bot API Token:
    - Get a bot token from [BotFather](https://core.telegram.org/bots#botfather).
+4. Notion API token:
+   - [todo]
+6. Notion template:
+   - [todo]
 
 ---
 
